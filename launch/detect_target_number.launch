@@ -1,0 +1,5 @@
+<launch>
+	<node pkg="s2r_pipeline" name="server" type="server.py" output="screen">
+	</node>
+</launch>
+

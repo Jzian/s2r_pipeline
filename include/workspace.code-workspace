@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"path": "../../../../EP_navigation"
+		},
+		{
+			"path": "../../detect_number_service"
+		},
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"python.autoComplete.extraPaths": [
+			"/home/sim2real/EP_navigation/devel/lib/python3/dist-packages",
+			"/home/sim2real/carto_ws/install_isolated/lib/python3/dist-packages",
+			"/home/sim2real/ep_ws/devel/lib/python3/dist-packages",
+			"/opt/ros/noetic/lib/python3/dist-packages"
+		],
+		"files.associations": {
+			"type_traits": "cpp"
+		}
+	}
+}

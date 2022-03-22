@@ -1,0 +1,8 @@
+uint32 work_case
+uint32 number
+---
+bool Detect_result
+uint32 target1
+uint32 target2
+uint32 target3
+
