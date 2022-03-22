@@ -65,7 +65,7 @@ private:
     int NUMS = 0,NUMS_last = 0;
     geometry_msgs::Twist MoveTwist;
     geometry_msgs::Pose2D Target;
-    bool TargetGetFlag{false},newGoal{true},DetectFlag{false},done{false};
+    bool TargetGetFlag{false},newGoal{true},DetectFlag{false},done{false},PutFlag{false};
     ros::Publisher log_pub;
     ServiceCaller* serviceCaller;
     ros::Subscriber subTarget;
@@ -312,7 +312,11 @@ void EP_Nav::run()
     if (!DetectFlag)
     {
         if (newGoal)
+        {
             GotoTarget(pose_targets, 6);
+            newGoal = false;
+        }
+            
         Target = ToPose(pose_targets, 6);
         newGoal = false;
         // result = navCore->getMoveBaseActionResult();
@@ -337,24 +341,36 @@ void EP_Nav::run()
     if(DetectFlag)
     {
         if(newGoal)
+        {
             GotoTarget(pose_targets, TagetNumArray[NUMS]);
+            newGoal = false;
+        }
+            
         Target = ToPose(pose_targets, TagetNumArray[NUMS]);            
         std::cout << "nums: " << NUMS << "; targetnum: "<< TagetNumArray[NUMS] << std::endl;
         std::cout << "out2: " << pose_targets.x[TagetNumArray[NUMS]] << "; " << pose_targets.y[TagetNumArray[NUMS]] << std::endl;
-        
-
         if(ArrivalGoal(Target))
         {
             serviceCaller->Grasp_worker(Grasp , TagetNumArray[NUMS]);
             if(serviceCaller->GraspDone)
+                PutFlag = true;
+        }
+        if(PutFlag)
+        {
+            GotoTarget(pose_targets, 0);
+            Target = ToPose(pose_targets, 0); 
+            if(ArrivalGoal(Target))
             {
+                //serviceCaller->Put_worker(Put , TagetNumArray[NUMS]);
+                //if(serviceCaller->PutDone)
+                PutFlag = false;
                 newGoal = true;
                 if (NUMS < TagetNumArray.size())
                     NUMS++;
             }
-        }        
-        else
-            newGoal = false;
+            else
+                newGoal = false;
+        }
     }
     // result = navCore->getMoveBaseActionResult();
     // std::cout << "goal" << result << std::endl;
