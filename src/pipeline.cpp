@@ -21,6 +21,7 @@ class ServiceCaller{
     ros::NodeHandle nh;
     ros::ServiceClient Detect_client;
     ros::ServiceClient Grasp_client;
+    ros::ServiceClient Put_client;
     // std::tr1::shared_ptr<boost::thread> thread_ptr_;
     std::atomic_bool srvCalling_{},srvFinished_{};
 public:
@@ -29,7 +30,8 @@ public:
     uint32_t DetectTarget[3];
     void Detect_worker(uint32_t flag,uint32_t num);
     void Grasp_worker(uint32_t flag, uint32_t NUM);
-    bool DetecDone{false}, GraspDone{false};
+    void Put_worker(uint32_t flag, uint32_t NUM);
+    bool DetecDone{false}, GraspDone{false},PutDone{false};
     bool callSrv(int SrvRequestType,Eigen::Vector3d transformation=Eigen::Vector3d(0,0,0));
     //const sim2real::sim2real_srv::Response & getSrvResponseStatus()const {return srv.response;};
     bool srvCalling() const { return srvCalling_;};
@@ -65,7 +67,7 @@ private:
     int NUMS = 0,NUMS_last = 0;
     geometry_msgs::Twist MoveTwist;
     geometry_msgs::Pose2D Target;
-    bool TargetGetFlag{false},newGoal{true},DetectFlag{false},done{false},PutFlag{false};
+    bool TargetGetFlag{false},newGoal{true},DetectFlag{false},done{false},PutFlag{false},arrival{false};
     ros::Publisher log_pub;
     ServiceCaller* serviceCaller;
     ros::Subscriber subTarget;
@@ -138,7 +140,8 @@ ServiceCaller::ServiceCaller()
 {
     Detect_client = nh.serviceClient<s2r_pipeline::TargetNumber>("/detect_grasp_place_service");
     Grasp_client = nh.serviceClient<s2r_pipeline::TargetNumber>("/detect_grasp_place_service");
-       
+    Put_client = nh.serviceClient<s2r_pipeline::TargetNumber>("/detect_grasp_place_service");
+
     
     
     // client =nh.serviceClient<sim2real::sim2real_srv>("manipulate");
@@ -171,6 +174,18 @@ void ServiceCaller::Grasp_worker(uint32_t  flag , uint32_t NUM)
     // std::cout << flag2 << std::endl;
 }
 
+void ServiceCaller::Put_worker(uint32_t  flag , uint32_t NUM)
+{
+    std::cout << "Put_worker" <<std::endl;
+    s2r_pipeline::TargetNumber Srv;
+    Srv.request.number = NUM;
+    Srv.request.work_case = flag;
+    Put_client.call(Srv);
+    PutDone = Srv.response.Detect_result;
+    // bool flag2 = Srv.response.Detect_result;
+    // std::cout << flag2 << std::endl;
+}
+
 bool ServiceCaller::callSrv(int SrvRequestType,Eigen::Vector3d transformation)
 {
     // thread_ptr_.reset(new boost::thread(boost::bind(&ServiceCaller::worker, this, SrvRequestType,transformation)));
@@ -196,9 +211,14 @@ bool EP_Nav::ArrivalGoal(geometry_msgs::Pose2D PoseTarget)
     dx = std::abs(currentpose.x - PoseTarget.x);
     dy = std::abs(currentpose.y - PoseTarget.y);
     dth = currentpose.theta - PoseTarget.theta;
-    
+    //std::cout << "arrival" << std::endl;
     if(dx < 0.15 && dy < 0.15)
     {
+        arrival = true;
+    }
+    if(arrival)
+    {
+        std::cout << "arrive xy" << std::endl;
         if(!done)
         {
             navCore->cancelAllGoals();
@@ -206,17 +226,29 @@ bool EP_Nav::ArrivalGoal(geometry_msgs::Pose2D PoseTarget)
             dth = currentpose.theta - PoseTarget.theta;
             MoveTwist.angular.z = -dth;
             Move_cmd(MoveTwist);
+            std::cout << "move th" << std::endl;
             NUMS_last++;
             done = true;    
-        }    
-        if(std::abs(dth) < 0.05)
-            Move_cmd_Stop();
-        
-        if(dx < 0.2 && dy < 0.2 && std::abs(dth) < 0.2)
+        }
+        if(std::abs(dth) < 0.1)
         {
+            std::cout << "stop" << std::endl;
+            Move_cmd_Stop();
+            std::cout << "arrive th" << std::endl;
+            arrival =false;
             done = false;
             return true;
-        }           
+        }
+        // if(arrival && std::abs(dth) < 0.1)
+        // {
+        //     std::cout << "arrive th" << std::endl;
+        //     arrival =false;
+        //     done = false;
+        //     return true;
+        // }   
+
+
+        
     }
     else 
         return false;
@@ -251,11 +283,12 @@ void EP_Nav::Move_cmd_Stop()
 EP_Nav::Posearray EP_Nav::PoseSet()
 {
     EP_Nav::Posearray posearray{};
-    posearray.x[0] = 1.213 ,posearray.y[0] = 1.722, posearray.th[0] = 0.016;    //Box
+    posearray.x[0] = 0.84 ,posearray.y[0] = 1.652, posearray.th[0] = 0.016;    //Box
     posearray.x[1] = 0.202 ,posearray.y[1] = 2.818, posearray.th[1] = 1.618;    //num1
-    posearray.x[2] = 0.147 ,posearray.y[2] = 2.263, posearray.th[2] = 0.117;    //num2
-    posearray.x[3] = 2.504 ,posearray.y[3] = 2.441, posearray.th[3] = 1.599;    //num3
-    posearray.x[4] = 2.024 ,posearray.y[4] = 0.194, posearray.th[4] = 3.129;    //num4
+    posearray.x[2] = 0.382 ,posearray.y[2] = 2.827, posearray.th[2] = -1.547;    //num2
+    // posearray.x[3] = 2.504 ,posearray.y[3] = 2.441, posearray.th[3] = 1.599;    //num3
+    posearray.x[3] = 1.936 ,posearray.y[3] = 2.60, posearray.th[3] = 0.048;    //num3
+    posearray.x[4] = 2.224 ,posearray.y[4] = 0.224, posearray.th[4] = 3.129;    //num4
     posearray.x[5] = 2.830 ,posearray.y[5] = -0.822, posearray.th[5] = -0.186;   //num5
     posearray.x[6] = 0.17 ,posearray.y[6] = 1.722, posearray.th[6] = 0.003;  //detect GoalNums
     return posearray;
@@ -344,29 +377,38 @@ void EP_Nav::run()
         {
             GotoTarget(pose_targets, TagetNumArray[NUMS]);
             newGoal = false;
+            std::cout << "nums: " << NUMS << "; targetnum: "<< TagetNumArray[NUMS] << std::endl;
+
         }
             
         Target = ToPose(pose_targets, TagetNumArray[NUMS]);            
         std::cout << "nums: " << NUMS << "; targetnum: "<< TagetNumArray[NUMS] << std::endl;
-        std::cout << "out2: " << pose_targets.x[TagetNumArray[NUMS]] << "; " << pose_targets.y[TagetNumArray[NUMS]] << std::endl;
-        if(ArrivalGoal(Target))
-        {
+        //std::cout << "out2: " << pose_targets.x[TagetNumArray[NUMS]] << "; " << pose_targets.y[TagetNumArray[NUMS]] << std::endl;
+        if(ArrivalGoal(Target) && !serviceCaller->GraspDone)
             serviceCaller->Grasp_worker(Grasp , TagetNumArray[NUMS]);
-            if(serviceCaller->GraspDone)
-                PutFlag = true;
+        if(serviceCaller->GraspDone)
+        {
+            PutFlag = true;
+            std::cout << "PutFlas:true"  << std::endl;
         }
+            
         if(PutFlag)
         {
+            navCore->cancelAllGoals();
             GotoTarget(pose_targets, 0);
+            std::cout << "gotozero" << std::endl;
             Target = ToPose(pose_targets, 0); 
             if(ArrivalGoal(Target))
             {
-                //serviceCaller->Put_worker(Put , TagetNumArray[NUMS]);
-                //if(serviceCaller->PutDone)
-                PutFlag = false;
-                newGoal = true;
-                if (NUMS < TagetNumArray.size())
-                    NUMS++;
+                serviceCaller->Put_worker(Put , TagetNumArray[NUMS]);
+                if(serviceCaller->PutDone)
+                {
+                    std::cout << "putdone:next goal"  << std::endl;
+                    PutFlag = false;
+                    newGoal = true;
+                    if (NUMS < TagetNumArray.size())
+                        NUMS++;
+                }
             }
             else
                 newGoal = false;

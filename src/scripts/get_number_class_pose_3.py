@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import cv2
 import numpy as np
-from predict_1 import predict_1
+from predict import predict
 from get_roi_3 import get_roi_3
 from cv_bridge import CvBridge, CvBridgeError
 import rospy
@@ -15,7 +15,7 @@ def cv_show(img):
     cv2.destroyAllWindows
 
 
-def get_number_class_pose_3():
+def get_number_class_pose_3(method):
     bridge = CvBridge()
     data = rospy.wait_for_message('/camera/color/image_raw', Image)
     try:
@@ -25,7 +25,7 @@ def get_number_class_pose_3():
     # cv_image = cv2.imread(
     #     '/home/xcy/kevin_ws/ros_ws/src/detect_grasp_place_service/scripts/total_scene.png')
     img = cv_image
-    rois, pos = get_roi_3(img, 'box')
+    rois, pos = get_roi_3(img, method)
     numbers_sort_x = []
     numbers_sort_index = []
     for p in pos:
@@ -36,7 +36,7 @@ def get_number_class_pose_3():
     cls_np = []
     index = []
     for roi in rois:
-        cc = predict_1(roi)
+        cc = predict(roi)
         cls.append(cc)
         cls_np.append(cc.numpy())
     for cls_n in cls_np:

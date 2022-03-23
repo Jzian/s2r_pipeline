@@ -70,20 +70,20 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-catkin_install_python(PROGRAMS
-  src/scripts/detect_grasp_place_server.py
-  src/scripts/client.py
-  src/scripts/toServer.py
-  src/scripts/get_number_class_1.py
-  src/scripts/get_number_class_pose_3.py
-  src/scripts/get_number_pose_1.py
-  src/scripts/get_roi_one.py
-  src/scripts/get_roi_3.py
-  src/scripts/grasp_cube_ddd.py
-  src/scripts/place_cube_ddd.py
-  src/scripts/predict_1.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+# catkin_install_python(PROGRAMS
+#   src/scripts/detect_grasp_place_server.py
+#   src/scripts/client.py
+#   src/scripts/toServer.py
+#   src/scripts/get_number_class_1.py
+#   src/scripts/get_number_class_pose_3.py
+#   src/scripts/get_number_pose_1.py
+#   src/scripts/get_roi_one.py
+#   src/scripts/get_roi_3.py
+#   src/scripts/grasp_cube_ddd.py
+#   src/scripts/place_cube_ddd.py
+#   src/scripts/predict_1.py
+#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
 # catkin_install_python(PROGRAMS
 #   scripts/detect_grasp_place_server.py
 #   scripts/client.py

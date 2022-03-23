@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 from dis import dis
 import threading
@@ -27,15 +27,18 @@ import tty
 
 class graspAruco:
     def __init__(self):
-        self.base_move_position_pub = rospy.Publisher("cmd_position", Twist)
-        self.base_move_vel_pub = rospy.Publisher("cmd_vel", Twist)
-        self.arm_gripper_pub = rospy.Publisher("arm_gripper", Point)
-        self.arm_position_pub = rospy.Publisher("arm_position", Pose)
-        self.image_sub = rospy.Subscriber(
-            "/aruco_pose", Pose, self.graspCallback, queue_size=1)
-
+        self.base_move_position_pub = rospy.Publisher(
+            "cmd_position", Twist, queue_size=10)
+        self.base_move_vel_pub = rospy.Publisher(
+            "cmd_vel", Twist, queue_size=10)
+        self.arm_gripper_pub = rospy.Publisher(
+            "arm_gripper", Point, queue_size=10)
+        self.arm_position_pub = rospy.Publisher(
+            "arm_position", Pose, queue_size=10)
+        # self.image_sub = rospy.Subscriber(
+        #     "/aruco_pose", Pose, self.graspCallback, queue_size=1)
+        self.image_sub = None
         self.grasp_success = False
-
         self.base_vel = 0.3
         # self.base_vel = 0.11
         self.execution_cycle = 10.0
@@ -239,12 +242,12 @@ class graspAruco:
         quat[3] = data.orientation.w
 
         # goal = [0.03, 0.0, 0.07]
-        goal = [0.0, 0.0, 0.1]
+        goal = [0.05, 0.0, 0.12]
         distance_in_x = tvec[2] - goal[2]
         distance_in_y = tvec[0] - goal[0]
 
-        print("distance in x", distance_in_x)
-        print("distance in y", distance_in_y)
+        # print("distance in x", distance_in_x)
+        # print("distance in y", distance_in_y)
 
         if (distance_in_x <= gama_x) and (abs(distance_in_y) <= gama_y):
             print("===== start to grasp ====")
@@ -291,6 +294,7 @@ def grasp():
     while not ap.grasp_success:
         pass
         # print("==========grasping===========")
+    print('finish grasp by ddd')
     return ap.grasp_success
 
 

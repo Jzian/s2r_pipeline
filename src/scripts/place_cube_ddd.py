@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/python3
 # Software License Agreement (BSD License)
 
 import re
@@ -48,12 +48,12 @@ def get_wp_from_pose(aruco_pose_msg):
     print("waypoint : ",wp_)
     return wp_
 
-class graspAruco:
+class palceAruco:
     def __init__(self):
-        self.base_move_position_pub = rospy.Publisher("cmd_position", Twist)
-        self.base_move_vel_pub = rospy.Publisher("cmd_vel", Twist)
-        self.arm_gripper_pub = rospy.Publisher("arm_gripper", Point)
-        self.arm_position_pub = rospy.Publisher("arm_position", Pose)
+        self.base_move_position_pub = rospy.Publisher("cmd_position", Twist,queue_size = 10)
+        self.base_move_vel_pub = rospy.Publisher("cmd_vel", Twist,queue_size = 10)
+        self.arm_gripper_pub = rospy.Publisher("arm_gripper", Point,queue_size = 10)
+        self.arm_position_pub = rospy.Publisher("arm_position", Pose,queue_size = 10)
         self.image_sub = rospy.Subscriber("/aruco_sink2", Pose, self.sinkCallback, queue_size = 1)
 
         self.place_success = False
@@ -386,7 +386,7 @@ class graspAruco:
        
 def main():
     rospy.init_node('grasp_aruco_node', anonymous=True)
-    ap = graspAruco()
+    ap = placeAruco()
     print("=====init=====")
     # ap.reset_arm()
     rospy.sleep(1)
@@ -454,12 +454,12 @@ def get_wp_from_pose(aruco_pose_msg):
     print("waypoint : ",wp_)
     return wp_
 
-class graspAruco:
+class placeAruco:
     def __init__(self):
-        self.base_move_position_pub = rospy.Publisher("cmd_position", Twist)
-        self.base_move_vel_pub = rospy.Publisher("cmd_vel", Twist)
-        self.arm_gripper_pub = rospy.Publisher("arm_gripper", Point)
-        self.arm_position_pub = rospy.Publisher("arm_position", Pose)
+        self.base_move_position_pub = rospy.Publisher("cmd_position", Twist,queue_size = 10)
+        self.base_move_vel_pub = rospy.Publisher("cmd_vel", Twist,queue_size = 10)
+        self.arm_gripper_pub = rospy.Publisher("arm_gripper", Point,queue_size = 10)
+        self.arm_position_pub = rospy.Publisher("arm_position", Pose,queue_size = 10)
         self.image_sub = rospy.Subscriber("/aruco_sink2", Pose, self.sinkCallback, queue_size = 1)
 
         self.place_success = False
@@ -792,7 +792,7 @@ class graspAruco:
        
 def main():
     rospy.init_node('grasp_aruco_node', anonymous=True)
-    ap = graspAruco()
+    ap = placeAruco()
     print("=====init=====")
     # ap.reset_arm()
     rospy.sleep(1)

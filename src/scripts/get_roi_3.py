@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 import cv2
@@ -43,15 +43,17 @@ def extract_roi(img, lsPointsChoose):
     return ROI[y1:y2, x1:x2]
 
 
-def get_roi_3(img, method_flag='box'):
+def get_roi_3(img, method_flag='target_number'):
     method = {'Traditional': True, 'Color': False}
     flag = method['Traditional']
     # cv2.imwrite('./output/00 原图.png', img)
     h, w, c = img.shape
-    if method_flag == 'box':
+    if method_flag == 'target_number':
         flag = method['Color']
         img = img[0:h // 3, 0:w, 0:c]
         img = cv2.resize(img, (3 * w, h))
+    elif method_flag == 'box':
+        flag = method['Color']
     if flag:
         # 传统方法start
         greyPic = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # 转化为灰度图
