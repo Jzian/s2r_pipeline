@@ -10,6 +10,7 @@ from geometry_msgs.msg import Pose
 from std_msgs.msg import UInt8
 import numpy as np
 import cv2
+from pose_detect import *
 
 class detect_grasp_place_server():
     def __init__(self):
@@ -24,6 +25,7 @@ class detect_grasp_place_server():
         self.grasp_flag = False
         self.place_flag = False
         self.toServer = toServer()
+        self.request_nubmer=0
         # self.pub_grasp_pose_thread = threading.Thread(
         #     target=self.pub_grasp_pose)
         # self.pub_grasp_pose_thread.start()
@@ -52,9 +54,11 @@ class detect_grasp_place_server():
 
         elif req.work_case == 3:
             self.place_flag = False
+            print('req.number:',req.number)
+            self.request_nubmer=req.number-1
             # self.target_number = self.toServer.case2_number_class()
-            self.target_number_pose = self.toServer.case2_number_pose()
-            self.target_numbers,self.target_numbers_pose=self.toServer.case3_box_class_pose('box')
+            # self.target_number_pose = self.toServer.case2_number_pose()
+            # self.target_numbers,self.target_numbers_pose=self.toServer.case3_box_class_pose('box')
             # if self.target_number_pose.shape[0] == 4:
             print('Ready to place')
             self.start_place()
@@ -99,7 +103,8 @@ class detect_grasp_place_server():
         # rate.sleep()
 
     def start_place(self):
-        number_of_box=0
+        number_of_box=self.request_nubmer
+        print('start_place_number_of_box:',number_of_box)
         print('start pub grasp_pose')
         # rate = rospy.Rate(30)
         # print('self.grasp_flag:', self.grasp_flag)
@@ -115,9 +120,8 @@ class detect_grasp_place_server():
         print("=====init=====")
         print("=====reset arm at beginning=====")
         print("=====open gripper at beginning=====")
-        y_last= self.toServer.case3_box_pose_pre(number_of_box)
         while not self.grasp_flag:
-            y_last,self.toServer.pose_msg = self.toServer.case3_box_pose_ddd(y_last)
+            self.toServer.pose_msg = self.toServer.case3_box_pose_ddd(number_of_box)
             self.toServer.place.sinkCallback(self.toServer.pose_msg)
             if self.toServer.place.place_success:
                 print('finish place')
@@ -128,10 +132,12 @@ class detect_grasp_place_server():
 
 
 if __name__ == "__main__":
+    load_template()
     detect = detect_grasp_place_server()
     add_thread = threading.Thread(target=detect.thread_job)
     add_thread.start()
     add_thread.setName('server_loop')
+    
     rate = rospy.Rate(100)
     pub_message = Pose()
     while not rospy.is_shutdown():

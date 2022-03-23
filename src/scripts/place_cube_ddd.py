@@ -44,8 +44,8 @@ def get_wp_from_pose(aruco_pose_msg):
     pos_wp = np.matmul(pos_,rot_)
     pos_wp += pos_marker
     wp_ = pos_wp[:3]
-    print("marker : ",pos_marker)
-    print("waypoint : ",wp_)
+    # print("marker : ",pos_marker)
+    # print("waypoint : ",wp_)
     return wp_
 
 class palceAruco:
@@ -349,8 +349,8 @@ class palceAruco:
         goal = [0.00, 0.0, 0.2]            
         distance_in_x = tvec[2] - goal[2]
         distance_in_y = tvec[0] - goal[0]
-        print("distance in x", distance_in_x)
-        print("distance in y", distance_in_y)
+        # print("distance in x", distance_in_x)
+        # print("distance in y", distance_in_y)
     
         if (distance_in_x <= gama_x) and (distance_in_y <= gama_y):
             # step forward
@@ -450,8 +450,8 @@ def get_wp_from_pose(aruco_pose_msg):
     pos_wp = np.matmul(pos_,rot_)
     pos_wp += pos_marker
     wp_ = pos_wp[:3]
-    print("marker : ",pos_marker)
-    print("waypoint : ",wp_)
+    # print("marker : ",pos_marker)
+    # print("waypoint : ",wp_)
     return wp_
 
 class placeAruco:
@@ -755,8 +755,8 @@ class placeAruco:
         goal = [0.00, 0.0, 0.2]            
         distance_in_x = tvec[2] - goal[2]
         distance_in_y = tvec[0] - goal[0]
-        print("distance in x", distance_in_x)
-        print("distance in y", distance_in_y)
+        # print("distance in x", distance_in_x)
+        # print("distance in y", distance_in_y)
     
         if (distance_in_x <= gama_x) and (distance_in_y <= gama_y):
             # step forward

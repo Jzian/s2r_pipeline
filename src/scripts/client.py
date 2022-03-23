@@ -14,7 +14,7 @@ def detect_grasp_place_client():
             '/detect_grasp_place_service', TargetNumber)
         req = TargetNumberRequest()
         req.work_case = 3
-        req.number = 4
+        req.number = 1
         response = detect_grasp_place_request(req)
         return response
     except(rospy.ServiceException):

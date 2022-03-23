@@ -210,7 +210,7 @@ class graspAruco:
         vel_cmd.angular.z = 0.0
         self.base_move_vel_pub.publish(vel_cmd)
 
-        rospy.sleep(0.01)
+        rospy.sleep(0.001)
         # motor STOP
         vel_cmd.linear.x = 0.0
         vel_cmd.linear.y = 0.0
@@ -242,7 +242,7 @@ class graspAruco:
         quat[3] = data.orientation.w
 
         # goal = [0.03, 0.0, 0.07]
-        goal = [0.05, 0.0, 0.12]
+        goal = [0.05, 0.0, 0.1]
         distance_in_x = tvec[2] - goal[2]
         distance_in_y = tvec[0] - goal[0]
 

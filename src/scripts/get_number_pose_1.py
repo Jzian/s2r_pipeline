@@ -8,7 +8,7 @@ from cv_bridge import CvBridge, CvBridgeError
 import rospy
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Pose
-from redmarkerdetection import *    # image processing by cython
+from pose_detect import *    # image processing by cython
 
 def cv_show(img):
     cv2.imshow('image', img)
@@ -109,7 +109,8 @@ def get_box_pose_ddd_pre(number_of_box):
     return standard_y_pre
 
 
-def get_box_pose_ddd(standard_y_last):
+def get_box_pose_ddd(number):
+    print(number)
     bridge = CvBridge()
     data = rospy.wait_for_message('/camera/color/image_raw', Image)
     try:
@@ -124,22 +125,22 @@ def get_box_pose_ddd(standard_y_last):
 
     id_list=[]
     # id_list,tvec_list,rvec_list= marker_detection(cv_image,seg_papram)
-    id_list,tvec_list,rvec_list= marker_detection(cv_image,seg_papram)
+    id_list,tvec_list,rvec_list= pose_detection(cv_image,seg_papram)
 
-    cv2.imshow('frame', cv_image)
-    cv2.waitKey(1)
+    # cv2.imshow('frame', cv_image)
+    # cv2.waitKey(1)
 
     # publish pose to rostopic
     target_detected = False
     aruco_pose_msg_list=[0,0,0]
     field_top = -0.15
     for i in range(len(id_list)):
-        print(pose_aruco_2_ros(rvec_list[i],tvec_list[i]).position.x)
-        print(standard_y_last)
-        if abs(pose_aruco_2_ros(rvec_list[i],tvec_list[i]).position.x-standard_y_last)<0.02:  
-            print("cccccccccccccccccccc")  
-            aruco_pose_msg = pose_aruco_2_ros(rvec_list[i],tvec_list[i])
-            y_last = pose_aruco_2_ros(rvec_list[i],tvec_list[i]).position.x
-            return y_last, aruco_pose_msg
-        else: print("kkkkkkkkkkkkkkkkkkkk")
+        aruco_pose_msg = pose_aruco_2_ros(rvec_list[i],tvec_list[i])
+        if aruco_pose_msg.position.y > field_top :
+            if (number == 0) and (id_list[i] == 3):
+                    return aruco_pose_msg
+            if (number == 1) and (id_list[i] == 4):
+                    return aruco_pose_msg
+            if (number == 2) and (id_list[i] == 5):
+                    return aruco_pose_msg
 

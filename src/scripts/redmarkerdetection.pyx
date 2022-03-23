@@ -101,7 +101,7 @@ def load_template():
     tpl_path = "./tpl/"
     for i in range(6):
         tpl = cv2.imread(tpl_path + str(i) + ".png", 0)
-        print(tpl.shape)
+        #print(tpl.shape)
         templates.append(tpl)
 
 def marker_detection(np.ndarray[DTYPE_t, ndim=3] frame,np.ndarray[DTYPE_t, ndim=1] seg_papram):
@@ -145,7 +145,7 @@ def marker_detection(np.ndarray[DTYPE_t, ndim=3] frame,np.ndarray[DTYPE_t, ndim=
     tvec_list = []
     quads_ID_MY=[]
     for i in range(len(quads_f)):
-        print(i,"--------------------")
+        #print(i,"--------------------")
         model_image = np.array([(quads_f[i][0,0,0],quads_f[i][0,0,1]),
                                 (quads_f[i][1,0,0],quads_f[i][1,0,1]),
                                 (quads_f[i][2,0,0],quads_f[i][2,0,1]),
@@ -154,12 +154,12 @@ def marker_detection(np.ndarray[DTYPE_t, ndim=3] frame,np.ndarray[DTYPE_t, ndim=
         point_size = 1
         point_color = (0, 0, 255)
         thickness = 8
-        print(i,"--------------------")
+        #print(i,"--------------------")
         for point in model_image:
             point=tuple(point.astype(int))
-            print(point)
+            #print(point)
             cv2.circle(frame, point, point_size, point_color, thickness)
-        print("----------------------")
+        #print("----------------------")
 
 
         ret, rvec, tvec = cv2.solvePnP(model_object, model_image, camera_matrix, dist_coeffs)

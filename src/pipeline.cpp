@@ -68,6 +68,7 @@ private:
     geometry_msgs::Twist MoveTwist;
     geometry_msgs::Pose2D Target;
     bool TargetGetFlag{false},newGoal{true},DetectFlag{false},done{false},PutFlag{false},arrival{false};
+    bool ToPut{false};
     ros::Publisher log_pub;
     ServiceCaller* serviceCaller;
     ros::Subscriber subTarget;
@@ -288,7 +289,7 @@ EP_Nav::Posearray EP_Nav::PoseSet()
     posearray.x[2] = 0.382 ,posearray.y[2] = 2.827, posearray.th[2] = -1.547;    //num2
     // posearray.x[3] = 2.504 ,posearray.y[3] = 2.441, posearray.th[3] = 1.599;    //num3
     posearray.x[3] = 1.936 ,posearray.y[3] = 2.60, posearray.th[3] = 0.048;    //num3
-    posearray.x[4] = 2.224 ,posearray.y[4] = 0.224, posearray.th[4] = 3.129;    //num4
+    posearray.x[4] = 2.44 ,posearray.y[4] = 0.166, posearray.th[4] = 3.129;    //num4
     posearray.x[5] = 2.830 ,posearray.y[5] = -0.822, posearray.th[5] = -0.186;   //num5
     posearray.x[6] = 0.17 ,posearray.y[6] = 1.722, posearray.th[6] = 0.003;  //detect GoalNums
     return posearray;
@@ -386,21 +387,27 @@ void EP_Nav::run()
         //std::cout << "out2: " << pose_targets.x[TagetNumArray[NUMS]] << "; " << pose_targets.y[TagetNumArray[NUMS]] << std::endl;
         if(ArrivalGoal(Target) && !serviceCaller->GraspDone)
             serviceCaller->Grasp_worker(Grasp , TagetNumArray[NUMS]);
-        if(serviceCaller->GraspDone)
+        if(serviceCaller->GraspDone && !PutFlag)
         {
             PutFlag = true;
+            ToPut = true;
             std::cout << "PutFlas:true"  << std::endl;
         }
             
         if(PutFlag)
         {
-            navCore->cancelAllGoals();
-            GotoTarget(pose_targets, 0);
+            //navCore->cancelAllGoals();
+            if (ToPut)
+            {
+                GotoTarget(pose_targets, 0);
+                ToPut = false;
+            }
+                
             std::cout << "gotozero" << std::endl;
             Target = ToPose(pose_targets, 0); 
             if(ArrivalGoal(Target))
             {
-                serviceCaller->Put_worker(Put , TagetNumArray[NUMS]);
+                serviceCaller->Put_worker(Put , NUMS);
                 if(serviceCaller->PutDone)
                 {
                     std::cout << "putdone:next goal"  << std::endl;
