@@ -30,6 +30,7 @@ def get_number_class_pose_3(method):
     numbers_sort_index = []
     for p in pos:
         numbers_sort_x.append(p[0][0][0])
+
     numbers_sort_index = sorted(
         range(len(numbers_sort_x)), key=lambda k: numbers_sort_x[k])
     cls = []

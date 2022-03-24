@@ -68,7 +68,7 @@ private:
     geometry_msgs::Twist MoveTwist;
     geometry_msgs::Pose2D Target;
     bool TargetGetFlag{false},newGoal{true},DetectFlag{false},done{false},PutFlag{false},arrival{false};
-    bool ToPut{false};
+    bool GraspFlag{false},ToPut{false},PutOnce{true};
     ros::Publisher log_pub;
     ServiceCaller* serviceCaller;
     ros::Subscriber subTarget;
@@ -88,8 +88,8 @@ public:
     enum Case 
     {
         DetectNum = 1,
-        Grasp,
-        Put,
+        Grasp = 2,
+        Put = 6,
     };
     
     struct Posearray{
@@ -120,7 +120,7 @@ public:
         pub_move_cmd = nh.advertise<geometry_msgs::Twist>("cmd_position",10);
         base_move_vel_pub = nh.advertise<geometry_msgs::Twist>("cmd_vel", 10);
         ite = TagetNumArray.begin();
-                
+        done = false;
         pose_targets = PoseSet();
         DetectFlag = false;
     }
@@ -200,6 +200,7 @@ void EP_Nav::GotoTarget(EP_Nav::Posearray posearray , int goal)
     target_pose.pose.x = posearray.x[goal];
     target_pose.pose.y = posearray.y[goal];
     //target_pose.pose.theta = posearray.th[goal];
+    std::cout << "setgoal" << std::endl;
     navCore->setGoal(target_pose.pose);
 
 }
@@ -212,8 +213,8 @@ bool EP_Nav::ArrivalGoal(geometry_msgs::Pose2D PoseTarget)
     dx = std::abs(currentpose.x - PoseTarget.x);
     dy = std::abs(currentpose.y - PoseTarget.y);
     dth = currentpose.theta - PoseTarget.theta;
-    //std::cout << "arrival" << std::endl;
-    if(dx < 0.15 && dy < 0.15)
+    //std::cout << "isarrival?" << std::endl;
+    if(dx < 0.1 && dy < 0.1)
     {
         arrival = true;
     }
@@ -229,9 +230,11 @@ bool EP_Nav::ArrivalGoal(geometry_msgs::Pose2D PoseTarget)
             Move_cmd(MoveTwist);
             std::cout << "move th" << std::endl;
             NUMS_last++;
-            done = true;    
+            done = true;
+            currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);                
+            dth = currentpose.theta - PoseTarget.theta;
         }
-        if(std::abs(dth) < 0.1)
+        if(std::abs(dth) < 0.1 )
         {
             std::cout << "stop" << std::endl;
             Move_cmd_Stop();
@@ -258,6 +261,13 @@ bool EP_Nav::ArrivalGoal(geometry_msgs::Pose2D PoseTarget)
 void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn)
 {
     geometry_msgs::Twist pose;
+    // pose.linear.x = 0;
+    // pose.linear.y = 0;
+    // pose.linear.z = 0;
+    // pose.angular.x = 0;
+    // pose.angular.y = 0;
+    // pose.angular.z = 1.0;
+    // base_move_vel_pub.publish(pose);
     pose.linear.x = poseIn.linear.x;
     pose.linear.y = poseIn.linear.y;
     pose.linear.z = poseIn.linear.z;
@@ -265,8 +275,7 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn)
     pose.angular.y = poseIn.angular.y;
     pose.angular.z = poseIn.angular.z;
     pub_move_cmd.publish(pose);
-    pose.angular.z = 1.0;
-    base_move_vel_pub.publish(pose);
+
 }
 
 void EP_Nav::Move_cmd_Stop()
@@ -284,14 +293,14 @@ void EP_Nav::Move_cmd_Stop()
 EP_Nav::Posearray EP_Nav::PoseSet()
 {
     EP_Nav::Posearray posearray{};
-    posearray.x[0] = 0.84 ,posearray.y[0] = 1.652, posearray.th[0] = 0.016;    //Box
-    posearray.x[1] = 0.202 ,posearray.y[1] = 2.818, posearray.th[1] = 1.618;    //num1
-    posearray.x[2] = 0.382 ,posearray.y[2] = 2.827, posearray.th[2] = -1.547;    //num2
+    posearray.x[0] = 0.871 ,posearray.y[0] = 1.55, posearray.th[0] = 0.006;    //Box
+    posearray.x[1] = 0.731 ,posearray.y[1] = 3.17, posearray.th[1] = -3.13;    //num1
+    posearray.x[2] = 0.382 ,posearray.y[2] = 2.827, posearray.th[2] = -1.287;    //num2
     // posearray.x[3] = 2.504 ,posearray.y[3] = 2.441, posearray.th[3] = 1.599;    //num3
-    posearray.x[3] = 1.936 ,posearray.y[3] = 2.60, posearray.th[3] = 0.048;    //num3
-    posearray.x[4] = 2.44 ,posearray.y[4] = 0.166, posearray.th[4] = 3.129;    //num4
-    posearray.x[5] = 2.830 ,posearray.y[5] = -0.822, posearray.th[5] = -0.186;   //num5
-    posearray.x[6] = 0.17 ,posearray.y[6] = 1.722, posearray.th[6] = 0.003;  //detect GoalNums
+    posearray.x[3] = 2.08 ,posearray.y[3] = 2.60, posearray.th[3] = 0.048;    //num3
+    posearray.x[4] = 2.403 ,posearray.y[4] = 0.321, posearray.th[4] = -3.091;    //num4
+    posearray.x[5] = 2.66 ,posearray.y[5] = -0.868, posearray.th[5] = 0.002;   //num5
+    posearray.x[6] = 0.218 ,posearray.y[6] = 1.612, posearray.th[6] = 0.003;  //detect GoalNums
     return posearray;
 }
 
@@ -379,42 +388,57 @@ void EP_Nav::run()
             GotoTarget(pose_targets, TagetNumArray[NUMS]);
             newGoal = false;
             std::cout << "nums: " << NUMS << "; targetnum: "<< TagetNumArray[NUMS] << std::endl;
-
+            GraspFlag = true;
         }
-            
-        Target = ToPose(pose_targets, TagetNumArray[NUMS]);            
-        std::cout << "nums: " << NUMS << "; targetnum: "<< TagetNumArray[NUMS] << std::endl;
-        //std::cout << "out2: " << pose_targets.x[TagetNumArray[NUMS]] << "; " << pose_targets.y[TagetNumArray[NUMS]] << std::endl;
-        if(ArrivalGoal(Target) && !serviceCaller->GraspDone)
-            serviceCaller->Grasp_worker(Grasp , TagetNumArray[NUMS]);
+        if(GraspFlag)
+        {
+            Target = ToPose(pose_targets, TagetNumArray[NUMS]);            
+             //std::cout << "out2: " << pose_targets.x[TagetNumArray[NUMS]] << "; " << pose_targets.y[TagetNumArray[NUMS]] << std::endl;
+            if(ArrivalGoal(Target))
+            {
+                serviceCaller->Grasp_worker(Grasp , TagetNumArray[NUMS]); 
+                GraspFlag = false;
+            }
+                                    
+        }
         if(serviceCaller->GraspDone && !PutFlag)
         {
             PutFlag = true;
             ToPut = true;
             std::cout << "PutFlas:true"  << std::endl;
-        }
-            
+            serviceCaller->GraspDone = false;
+        }          
         if(PutFlag)
         {
             //navCore->cancelAllGoals();
             if (ToPut)
             {
-                GotoTarget(pose_targets, 0);
+                GotoTarget(pose_targets,0);
                 ToPut = false;
+                std::cout << "gotozero" << std::endl;
             }
-                
-            std::cout << "gotozero" << std::endl;
-            Target = ToPose(pose_targets, 0); 
+            Target = ToPose(pose_targets,0); 
             if(ArrivalGoal(Target))
             {
-                serviceCaller->Put_worker(Put , NUMS);
+                if(PutOnce)
+                {
+                    serviceCaller->Put_worker(Put , NUMS);
+                    PutOnce = false;
+                    std::cout << "putcall" << std::endl;
+                }
+
                 if(serviceCaller->PutDone)
                 {
                     std::cout << "putdone:next goal"  << std::endl;
                     PutFlag = false;
                     newGoal = true;
+                    PutOnce = true;
                     if (NUMS < TagetNumArray.size())
+                    {
                         NUMS++;
+                        Target = ToPose(pose_targets,TagetNumArray[NUMS]);
+                    }
+                        
                 }
             }
             else

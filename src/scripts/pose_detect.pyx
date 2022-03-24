@@ -101,7 +101,6 @@ def load_template():
     tpl_path = "/home/sim2real/ep_ws/src/s2r_pipeline/src/scripts/tpl/"
     for i in range(6):
         tpl = cv2.imread(tpl_path + str(i) + ".png", 0)
-        print(tpl.shape)
         templates.append(tpl)
 
 def pose_detection(np.ndarray[DTYPE_t, ndim=3] frame,np.ndarray[DTYPE_t, ndim=1] seg_papram):
@@ -148,7 +147,7 @@ def pose_detection(np.ndarray[DTYPE_t, ndim=3] frame,np.ndarray[DTYPE_t, ndim=1]
                                 (quads_f[i][1,0,0],quads_f[i][1,0,1]),
                                 (quads_f[i][2,0,0],quads_f[i][2,0,1]),
                                 (quads_f[i][3,0,0],quads_f[i][3,0,1])])
-        print(model_image)
+                                
         ret, rvec, tvec = cv2.solvePnP(model_object, model_image, camera_matrix, dist_coeffs)
         projectedPoints,_ = cv2.projectPoints(model_object, rvec, tvec, camera_matrix, dist_coeffs)
 

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import cv2
 import numpy as np
-from PIL import Image
 
 
 def points2area(points: np.ndarray):
@@ -119,7 +118,10 @@ def get_roi_1(img, method_flag='number'):
     numbers_sort = []
     roi_size = []
     for p in roi_box:
-        numbers_sort.append(p[0][0][1])
+        points = np.squeeze(p)
+        x, y = np.split(points, 2, axis=1)
+        x, y = np.squeeze(x), np.squeeze(y)
+        numbers_sort.append(max(y))
         roi_size.append(cv2.contourArea(p))
     numbers_sort_index = sorted(
         range(len(numbers_sort)), key=lambda k: numbers_sort[k])

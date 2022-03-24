@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 import cv2
 import numpy as np
-from predict import predict
 from get_roi_1 import get_roi_1
 from cv_bridge import CvBridge, CvBridgeError
 import rospy
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Pose
 from pose_detect import *    # image processing by cython
+from grasp_cube_kevin import grasp_cube_kevin
+
 
 def cv_show(img):
     cv2.imshow('image', img)
@@ -29,6 +30,7 @@ def get_number_pose_1():
     roi, pos = get_roi_1(img, 'number')
     return pos
 
+
 def pose_aruco_2_ros(rvec, tvec):
     aruco_pose_msg = Pose()
     aruco_pose_msg.position.x = tvec[0]
@@ -39,40 +41,6 @@ def pose_aruco_2_ros(rvec, tvec):
     aruco_pose_msg.orientation.z = 0
     aruco_pose_msg.orientation.w = 0
     return aruco_pose_msg
-
-def get_number_pose_ddd():
-    bridge = CvBridge()
-    data = rospy.wait_for_message('/camera/color/image_raw', Image)
-    try:
-        cv_image = bridge.imgmsg_to_cv2(data, "bgr8")
-    except CvBridgeError as err:
-        print(err)
-    # cv_image = cv2.imread(
-    #     '/home/xcy/kevin_ws/ros_ws/src/detect_grasp_place_service/scripts/1.png')
-    img = cv_image
-
-    seg_papram = np.array([0,15,125,180,46,80],dtype="uint8")
-
-    id_list=[]
-    # id_list,tvec_list,rvec_list= marker_detection(cv_image,seg_papram)
-    id_list,tvec_list,rvec_list= marker_detection(cv_image,seg_papram)
-
-    # cv2.imshow('frame', cv_image)
-    # cv2.waitKey(1)
-
-    # publish pose to rostopic
-    target_detected = False
-
-    field_top = -0.15
-    for i in range(len(id_list)):
-        aruco_pose_msg = pose_aruco_2_ros(rvec_list[i],tvec_list[i])
-        # print("dxxxxxxxxxxxxxxxxxxxx: ", id_list[i])
-        # print(aruco_pose_msg)
-        if target_detected == False:
-            # choose cube to publish
-            if aruco_pose_msg.position.y < 0.02 and aruco_pose_msg.position.y > field_top:
-                return aruco_pose_msg
-
 
 
 def get_box_pose_ddd_pre(number_of_box):
@@ -86,26 +54,28 @@ def get_box_pose_ddd_pre(number_of_box):
     #     '/home/xcy/kevin_ws/ros_ws/src/detect_grasp_place_service/scripts/1.png')
     img = cv_image
 
-    seg_papram = np.array([0,15,125,180,46,80],dtype="uint8")
+    seg_papram = np.array([0, 15, 125, 180, 46, 80], dtype="uint8")
 
-    id_list=[]
+    id_list = []
     # id_list,tvec_list,rvec_list= marker_detection(cv_image,seg_papram)
-    id_list,tvec_list,rvec_list= marker_detection(cv_image,seg_papram)
+    id_list, tvec_list, rvec_list = marker_detection(cv_image, seg_papram)
 
     cv2.imshow('frame', cv_image)
     cv2.waitKey(1)
 
     # publish pose to rostopic
     target_detected = False
-    aruco_pose_msg_list=[0,0,0]
-    y_list=[]
+    aruco_pose_msg_list = [0, 0, 0]
+    y_list = []
     field_top = -0.15
     for i in range(len(id_list)):
-        if pose_aruco_2_ros(rvec_list[i],tvec_list[i]).position.y > field_top :    
-            y_list.append(pose_aruco_2_ros(rvec_list[i],tvec_list[i]).position.x)
+        if pose_aruco_2_ros(rvec_list[i], tvec_list[i]).position.y > field_top:
+            y_list.append(pose_aruco_2_ros(
+                rvec_list[i], tvec_list[i]).position.x)
     top_index = sorted(
-            range(len(y_list)), key=lambda k: y_list[k])
-    standard_y_pre=pose_aruco_2_ros(rvec_list[top_index[number_of_box]],tvec_list[top_index[number_of_box]]).position.x 
+        range(len(y_list)), key=lambda k: y_list[k])
+    standard_y_pre = pose_aruco_2_ros(
+        rvec_list[top_index[number_of_box]], tvec_list[top_index[number_of_box]]).position.x
     return standard_y_pre
 
 
@@ -113,6 +83,8 @@ def get_box_pose_ddd(number):
     print(number)
     bridge = CvBridge()
     data = rospy.wait_for_message('/camera/color/image_raw', Image)
+    move=grasp_cube_kevin()
+
     try:
         cv_image = bridge.imgmsg_to_cv2(data, "bgr8")
     except CvBridgeError as err:
@@ -121,26 +93,25 @@ def get_box_pose_ddd(number):
     #     '/home/xcy/kevin_ws/ros_ws/src/detect_grasp_place_service/scripts/1.png')
     img = cv_image
 
-    seg_papram = np.array([0,15,125,180,46,80],dtype="uint8")
+    seg_papram = np.array([0, 15, 125, 180, 46, 80], dtype="uint8")
 
-    id_list=[]
+    id_list = []
     # id_list,tvec_list,rvec_list= marker_detection(cv_image,seg_papram)
-    id_list,tvec_list,rvec_list= pose_detection(cv_image,seg_papram)
+    id_list, tvec_list, rvec_list = pose_detection(cv_image, seg_papram)
 
     # cv2.imshow('frame', cv_image)
     # cv2.waitKey(1)
 
     # publish pose to rostopic
     target_detected = False
-    aruco_pose_msg_list=[0,0,0]
+    aruco_pose_msg_list = [0, 0, 0]
     field_top = -0.15
     for i in range(len(id_list)):
-        aruco_pose_msg = pose_aruco_2_ros(rvec_list[i],tvec_list[i])
-        if aruco_pose_msg.position.y > field_top :
+        aruco_pose_msg = pose_aruco_2_ros(rvec_list[i], tvec_list[i])
+        if aruco_pose_msg.position.y > field_top:
             if (number == 0) and (id_list[i] == 3):
-                    return aruco_pose_msg
+                return aruco_pose_msg
             if (number == 1) and (id_list[i] == 4):
-                    return aruco_pose_msg
+                return aruco_pose_msg
             if (number == 2) and (id_list[i] == 5):
-                    return aruco_pose_msg
-
+                return aruco_pose_msg
