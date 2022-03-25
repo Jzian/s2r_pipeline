@@ -84,7 +84,7 @@ class detect_grasp_place_server():
                     elif not 3 in box_pose_dict:
                         self.toServer.grasp_place.move_right_by_distance(0.2)
                         print('can not see x,move right')
-                    rospy.sleep(0.5)
+                    rospy.sleep(1)
                     self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
                         'box')
                 self.start_place()
