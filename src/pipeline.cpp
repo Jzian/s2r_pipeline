@@ -266,7 +266,7 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
     dth = currentpose.theta - PoseTarget.theta;
     Cth = currentpose.theta;
     Tth = PoseTarget.theta;
-    while(std::abs(dth) > 0.1)
+    while(std::abs(dth) > 0.05)
     {
         if (Cth * Tth < 0)
         {
@@ -326,7 +326,7 @@ EP_Nav::Posearray EP_Nav::PoseSet()
 {
     EP_Nav::Posearray posearray{};
     posearray.x[0] = 0.871 ,posearray.y[0] = 1.55, posearray.th[0] = 0.00;    //Box
-    posearray.x[1] = 0.796 ,posearray.y[1] = 3.2, posearray.th[1] = -3.13;    //num1
+    posearray.x[1] = 0.721 ,posearray.y[1] = 3.17, posearray.th[1] = -3.13;    //num1
     posearray.x[2] = 0.382 ,posearray.y[2] = 2.827, posearray.th[2] = -1.287;    //num2
     // posearray.x[3] = 2.504 ,posearray.y[3] = 2.441, posearray.th[3] = 1.599;    //num3
     posearray.x[3] = 2.08 ,posearray.y[3] = 2.60, posearray.th[3] = 0.048;    //num3
