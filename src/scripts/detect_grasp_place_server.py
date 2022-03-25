@@ -28,6 +28,7 @@ class detect_grasp_place_server():
         self.toServer = toServer()
         self.request_nubmer = 0
         self.place_box_number = 0
+        self.judge_state_distance = 0
 
     def targetCallback(self, req):
         print(req.work_case)
@@ -51,7 +52,6 @@ class detect_grasp_place_server():
                 self.grasp_flag = False
                 print('Finish grasp')
                 return TargetNumberResponse(True, self.target_numbers[0], self.target_numbers[1], self.target_numbers[2])
-
         elif req.work_case == 6:
             try:
                 self.place_flag = False
@@ -70,12 +70,13 @@ class detect_grasp_place_server():
             if self.place_flag:
                 self.place_flag = False
                 print('send place success')
-                return TargetNumberResponse(True,9, 9, 9)
+                return TargetNumberResponse(True, 9, 9, 9)
         elif req.work_case == 2:
-            if self.toServer.case2_number_pose()[:,0,:].shape[0]!=4:
-                return TargetNumberResponse(False, 8,8,8)
+            if self.toServer.case2_number_pose()[:, 0, :].shape[0] != 4 and self.judge_state_distance == 0:
+                return TargetNumberResponse(False, 8, 8, 8)
             self.grasp_kevin(req.number)
-            return TargetNumberResponse(True, 9,9,9)
+            self.judge_state_distance = 0
+            return TargetNumberResponse(True, 9, 9, 9)
         elif req.work_case == 3:
             place_number = req.number
             self.place_flag = False
@@ -124,9 +125,8 @@ class detect_grasp_place_server():
         print("=====open gripper at beginning=====")
         self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
             'box')
-        if len(self.target_numbers)==2:
+        if len(self.target_numbers) == 2:
             self.toServer.grasp_place.move_left_by_distance(0.11)
-
         while not self.place_flag:
             self.toServer.pose_msg = self.toServer.case3_box_pose_ddd(
                 number_of_box)
@@ -137,9 +137,7 @@ class detect_grasp_place_server():
                 self.place_flag = True
         rate.sleep()
 
-
-
-    def grasp_kevin(self,number):
+    def grasp_kevin(self, number):
         self.grasp_flag = False
         rate = rospy.Rate(100)
         self.toServer.grasp_place.set_arm()
@@ -152,13 +150,18 @@ class detect_grasp_place_server():
 
                 center = self.toServer.grasp_place.pose_msg.position.x
                 distance = self.toServer.grasp_place.pose_msg.position.z
-                print(center, distance)               
+                self.judge_state_distance = distance
+                print(center, distance)
                 self.toServer.grasp_place.forward_to_cube(
-                    center, distance,self.toServer.grasp_place.pose_msg.orientation)
+                    center, distance, self.toServer.grasp_place.pose_msg.orientation)
             except Exception as e:
                 print('the img is wrong')
-                self.toServer.grasp_place.move_function_xy(0.5,0)
-                self.toServer.grasp_place.place_cube()
+                if self.toServer.case2_number_pose()[:, 0, :].shape[0] != 4 and self.judge_state_distance > 20:
+                    self.toServer.grasp_place.move_forward_by_distance(0.1)
+                    print('not ready to grasp,but one frame is lost')
+                elif self.toServer.case2_number_pose()[:, 0, :].shape[0] != 4 and self.judge_state_distance < 15:
+                    print('ready to grasp cube,but can not see the cube')
+                    self.toServer.grasp_place.move_forward_by_distance(-0.1)
             finally:
                 if self.toServer.grasp_place.grasp_success:
                     self.grasp_flag = True
@@ -169,7 +172,7 @@ class detect_grasp_place_server():
             return True
 
 
-if __name__ == "__main__":
+if __name__ == "main":
     load_template()
     detect = detect_grasp_place_server()
     add_thread = threading.Thread(target=detect.thread_job)

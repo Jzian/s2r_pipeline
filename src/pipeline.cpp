@@ -78,7 +78,7 @@ private:
     // void TargetCallback(const std_msgs::String::ConstPtr& msg_p);
     void TargetNumberCallback(const std_msgs::String::ConstPtr& msg_p);
     void setGoal(const geometry_msgs::Pose2D &goal2d);
-    void Move_cmd(geometry_msgs::Twist poseIn);
+    void Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTarget);
     void Move_cmd_Stop();
     bool ArrivalGoal(geometry_msgs::Pose2D PosrIn);
     
@@ -224,57 +224,88 @@ bool EP_Nav::ArrivalGoal(geometry_msgs::Pose2D PoseTarget)
         if(!done)
         {
             navCore->cancelAllGoals();
-            currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);                
-            dth = currentpose.theta - PoseTarget.theta;
-            MoveTwist.angular.z = -dth;
-            Move_cmd(MoveTwist);
+            // currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);                
+            // dth = currentpose.theta - PoseTarget.theta;
+            // MoveTwist.angular.z = -dth;
+            Move_cmd(MoveTwist,PoseTarget);
             std::cout << "move th" << std::endl;
-            NUMS_last++;
             done = true;
-            currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);                
-            dth = currentpose.theta - PoseTarget.theta;
-        }
-        if(std::abs(dth) < 0.1 )
-        {
-            std::cout << "stop" << std::endl;
-            Move_cmd_Stop();
-            std::cout << "arrive th" << std::endl;
             arrival =false;
             done = false;
             return true;
         }
-        // if(arrival && std::abs(dth) < 0.1)
+        // if(std::abs(dth) < 0.1 )
         // {
+        //     std::cout << "stop" << std::endl;
+        //     Move_cmd_Stop();
         //     std::cout << "arrive th" << std::endl;
         //     arrival =false;
         //     done = false;
         //     return true;
-        // }   
-
-
-        
+        // }
+        // else 
+        // {
+        //     std::cout << "unarrive th!!!" << std::endl;
+        //     currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);                
+        //     dth = currentpose.theta - PoseTarget.theta;
+        //     MoveTwist.angular.z = -dth;
+        //     Move_cmd(MoveTwist);
+        // }
     }
     else 
         return false;
 }
 
-void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn)
+void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTarget)
 {
-    geometry_msgs::Twist pose;
-    // pose.linear.x = 0;
-    // pose.linear.y = 0;
-    // pose.linear.z = 0;
-    // pose.angular.x = 0;
-    // pose.angular.y = 0;
-    // pose.angular.z = 1.0;
-    // base_move_vel_pub.publish(pose);
-    pose.linear.x = poseIn.linear.x;
-    pose.linear.y = poseIn.linear.y;
-    pose.linear.z = poseIn.linear.z;
-    pose.angular.x = poseIn.angular.x;
-    pose.angular.y = poseIn.angular.y;
-    pose.angular.z = poseIn.angular.z;
-    pub_move_cmd.publish(pose);
+    geometry_msgs::Twist pose;     
+    geometry_msgs::Pose2D currentpose;
+    double dth,Cth,Tth ,turn;       
+    currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);                
+    dth = currentpose.theta - PoseTarget.theta;
+    Cth = currentpose.theta;
+    Tth = PoseTarget.theta;
+    while(std::abs(dth) > 0.1)
+    {
+        if (Cth * Tth < 0)
+        {
+            if ( abs(Cth)+abs(Tth) > 3.14)
+            {
+                if(Cth > 0)
+                    turn = 1.0;
+                else
+                    turn = -1.0;
+            }
+            else 
+            {
+                if(Cth > 0)
+                    turn = -1.0;
+                else
+                    turn = 1.0;
+            }
+        }
+        else if(Cth < 0)
+            turn = (Tth - Cth)>0 ? 1.0 : -1.0;
+        else
+            turn = (Tth -Cth)>0 ? 1.0:-1.0;
+        pose.linear.x = 0;
+        pose.linear.y = 0;
+        pose.linear.z = 0;
+        pose.angular.x = 0;
+        pose.angular.y = 0;
+        pose.angular.z = turn;
+        base_move_vel_pub.publish(pose);
+        currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);                
+        dth = currentpose.theta - PoseTarget.theta;
+    }
+    Move_cmd_Stop();
+    // pose.linear.x = poseIn.linear.x;
+    // pose.linear.y = poseIn.linear.y;
+    // pose.linear.z = poseIn.linear.z;
+    // pose.angular.x = poseIn.angular.x;
+    // pose.angular.y = poseIn.angular.y;
+    // pose.angular.z = poseIn.angular.z;
+    // pub_move_cmd.publish(pose);
 
 }
 
@@ -294,7 +325,7 @@ EP_Nav::Posearray EP_Nav::PoseSet()
 {
     EP_Nav::Posearray posearray{};
     posearray.x[0] = 0.871 ,posearray.y[0] = 1.55, posearray.th[0] = 0.006;    //Box
-    posearray.x[1] = 0.731 ,posearray.y[1] = 3.17, posearray.th[1] = -3.13;    //num1
+    posearray.x[1] = 0.796 ,posearray.y[1] = 3.2, posearray.th[1] = -3.13;    //num1
     posearray.x[2] = 0.382 ,posearray.y[2] = 2.827, posearray.th[2] = -1.287;    //num2
     // posearray.x[3] = 2.504 ,posearray.y[3] = 2.441, posearray.th[3] = 1.599;    //num3
     posearray.x[3] = 2.08 ,posearray.y[3] = 2.60, posearray.th[3] = 0.048;    //num3
