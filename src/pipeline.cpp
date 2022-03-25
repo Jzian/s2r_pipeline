@@ -16,7 +16,7 @@
 #include "geometry_msgs/Twist.h"
 
 //hello 
-//test error
+//test_error_kevin
 class ServiceCaller{
     std::tr1::shared_ptr<boost::thread> thread_ptr_;
     ros::NodeHandle nh;
