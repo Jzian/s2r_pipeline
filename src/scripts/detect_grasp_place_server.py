@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # kevin_node
-#zhou_node 
+# zhou_node
 from s2r_pipeline.srv import TargetNumber, TargetNumberResponse
 import rospy
 import threading
@@ -30,6 +30,7 @@ class detect_grasp_place_server():
         self.request_nubmer = 0
         self.place_box_number = 0
         self.judge_state_distance = 0
+        self.judge_state_center = 0
 
     def targetCallback(self, req):
         print(req.work_case)
@@ -77,6 +78,7 @@ class detect_grasp_place_server():
                 return TargetNumberResponse(False, 8, 8, 8)
             self.grasp_kevin(req.number)
             self.judge_state_distance = 0
+            self.judge_state_center = 0
             return TargetNumberResponse(True, 9, 9, 9)
         elif req.work_case == 3:
             place_number = req.number
@@ -152,6 +154,7 @@ class detect_grasp_place_server():
                 center = self.toServer.grasp_place.pose_msg.position.x
                 distance = self.toServer.grasp_place.pose_msg.position.z
                 self.judge_state_distance = distance
+                self.judge_state_center = center
                 print(center, distance)
                 self.toServer.grasp_place.forward_to_cube(
                     center, distance, self.toServer.grasp_place.pose_msg.orientation)
@@ -160,9 +163,12 @@ class detect_grasp_place_server():
                 if self.toServer.case2_number_pose()[:, 0, :].shape[0] != 4 and self.judge_state_distance > 20:
                     self.toServer.grasp_place.move_forward_by_distance(0.1)
                     print('not ready to grasp,but one frame is lost')
-                elif self.toServer.case2_number_pose()[:, 0, :].shape[0] != 4 and self.judge_state_distance < 15:
+                elif self.toServer.case2_number_pose()[:, 0, :].shape[0] != 4 and self.judge_state_center < 0:
                     print('ready to grasp cube,but can not see the cube')
-                    self.toServer.grasp_place.move_forward_by_distance(-0.1)
+                    self.toServer.grasp_place.move_right_by_distance(0.1)
+                elif self.toServer.case2_number_pose()[:, 0, :].shape[0] != 4 and self.judge_state_center > 0:
+                    print('ready to grasp cube,but can not see the cube')
+                    self.toServer.grasp_place.move_left_by_distance(0.1)
             finally:
                 if self.toServer.grasp_place.grasp_success:
                     self.grasp_flag = True
@@ -173,7 +179,7 @@ class detect_grasp_place_server():
             return True
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     load_template()
     detect = detect_grasp_place_server()
     add_thread = threading.Thread(target=detect.thread_job)

@@ -362,7 +362,7 @@ class grasp_cube_kevin():
             elif r < -5:
                 self.move_function_z(0.2)
             else:
-                if distance > 0.12:
+                if distance > 0.13:
                     self.move_function_xy(1,0)
                 elif center > mid +0.01:
                     self.move_function_xy(0,-1)

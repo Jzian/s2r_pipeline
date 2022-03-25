@@ -150,7 +150,7 @@ ServiceCaller::ServiceCaller()
 }
 void ServiceCaller::Detect_worker(uint32_t flag ,uint32_t num)
 {
-    std::cout << "worker" <<std::endl;
+    std::cout << "Detect worker " <<std::endl;
     s2r_pipeline::TargetNumber Srv;
     Srv.request.work_case = flag;
     Srv.request.number = num;
@@ -325,14 +325,14 @@ void EP_Nav::Move_cmd_Stop()
 EP_Nav::Posearray EP_Nav::PoseSet()
 {
     EP_Nav::Posearray posearray{};
-    posearray.x[0] = 0.871 ,posearray.y[0] = 1.55, posearray.th[0] = 0.006;    //Box
+    posearray.x[0] = 0.871 ,posearray.y[0] = 1.55, posearray.th[0] = 0.00;    //Box
     posearray.x[1] = 0.796 ,posearray.y[1] = 3.2, posearray.th[1] = -3.13;    //num1
     posearray.x[2] = 0.382 ,posearray.y[2] = 2.827, posearray.th[2] = -1.287;    //num2
     // posearray.x[3] = 2.504 ,posearray.y[3] = 2.441, posearray.th[3] = 1.599;    //num3
     posearray.x[3] = 2.08 ,posearray.y[3] = 2.60, posearray.th[3] = 0.048;    //num3
     posearray.x[4] = 2.403 ,posearray.y[4] = 0.321, posearray.th[4] = -3.091;    //num4
-    posearray.x[5] = 2.66 ,posearray.y[5] = -0.868, posearray.th[5] = 0.002;   //num5
-    posearray.x[6] = 0.218 ,posearray.y[6] = 1.612, posearray.th[6] = 0.003;  //detect GoalNums
+    posearray.x[5] = 2.66 ,posearray.y[5] = -0.868, posearray.th[5] = 0.00;   //num5
+    posearray.x[6] = 0.167 ,posearray.y[6] = 1.512, posearray.th[6] = 0.00;  //detect GoalNums
     return posearray;
 }
 
