@@ -456,6 +456,7 @@ void EP_Nav::run()
 
 int main(int argc, char** argv)
 {
+    sleep(6);
     ros::init(argc , argv, "sim2real_client");
     ros::NodeHandle nh_;
     ros::Rate loop_rate(10);

@@ -1,6 +1,6 @@
 <launch>
 	<!-- <node pkg="carto_navigation" name="navigation" type="s2r_pipeline_pipeline" output="screen"/> -->
-	<!-- <include file="$(find carto_navigation)/launch/navigation.launch"/> -->
+	<include file="$(find carto_navigation)/launch/navigation.launch"/>
 	<node pkg="s2r_pipeline" name="detect_grasp_place_server" type="detect_grasp_place_server.py" output="screen"/>
 	<node pkg="s2r_pipeline" name="pipeline" type="s2r_pipeline_pipeline" output="screen"/>
     <!-- <node pkg="target_number_pose_service" name="grasp" type="server.py" output="screen"/> -->
