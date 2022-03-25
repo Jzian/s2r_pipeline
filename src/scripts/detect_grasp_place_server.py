@@ -59,14 +59,27 @@ class detect_grasp_place_server():
                 self.place_flag = False
                 print('req.number:', req.number)
                 self.request_nubmer = req.number
-                # self.target_number = self.toServer.case2_number_class()
-                # self.target_number_pose = self.toServer.case2_number_pose()
-                # self.target_numbers,self.target_numbers_pose=self.toServer.case3_box_class_pose('box')
-                # if self.target_number_pose.shape[0] == 4:
                 print('Ready to place')
                 self.start_place()
             except Exception:
                 print('zhou postion is not right')
+                self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
+                    'box')
+                for i in range(len(self.target_numbers)):
+                    self.target_numbers[i] -= 5
+                box_pose_dict = dict(
+                    zip(self.target_numbers, self.target_numbers_pose))
+                place_box_number_pose = box_pose_dict[place_number]
+                self.toServer.grasp_place.pose_msg = self.toServer.grasp_place.point2msg(
+                    place_box_number_pose)
+                center = self.toServer.grasp_place.pose_msg.position.x
+                distance = self.toServer.grasp_place.pose_msg.position.z
+                print(self.toServer.grasp_place.pose_msg.orientation)
+                print(center, distance)
+                self.toServer.grasp_place.forward_to_box(
+                    center, distance)
+                # self.toServer.grasp_place.place_cube()
+                print(place_box_number_pose)
                 self.toServer.grasp_place.move_left_by_distance(0.2)
                 self.start_place()
             if self.place_flag:
