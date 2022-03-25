@@ -41,6 +41,7 @@ class grasp_cube_kevin():
         self.close_camera = False
         self.base_vel = 0.3
         self.rpy = []
+
     def q2e(self, orientation):
         x = orientation.x
         y = orientation.y
@@ -53,6 +54,7 @@ class grasp_cube_kevin():
         y = math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
         y = y / math.pi * 180
         return r, p, y
+
     def open_gripper(self):
         open_gripper_msg = Point()
         open_gripper_msg.x = 0.0
@@ -347,29 +349,29 @@ class grasp_cube_kevin():
         self.grasp_success = True
 
     def forward_to_cube(self, center, distance, orientation):
-        _,r,_=self.q2e(orientation)
-        mid =  0.037
+        _, r, _ = self.q2e(orientation)
+        mid = 0.037
         print(r)
-        if center > mid +0.03:
-            self.move_function_xy(0,-1)
-        elif center < mid -0.03:
-            self.move_function_xy(0,1)
+        if center > mid + 0.03:
+            self.move_function_xy(0, -1)
+        elif center < mid - 0.03:
+            self.move_function_xy(0, 1)
         elif distance > 0.35:
-            self.move_function_xy(1,0)
-        else :
+            self.move_function_xy(1, 0)
+        else:
             if r > 5:
                 self.move_function_z(-0.2)
             elif r < -5:
                 self.move_function_z(0.2)
             else:
                 if distance > 0.13:
-                    self.move_function_xy(1,0)
-                elif center > mid +0.01:
-                    self.move_function_xy(0,-1)
+                    self.move_function_xy(1, 0)
+                elif center > mid + 0.01:
+                    self.move_function_xy(0, -1)
                 elif center < mid - 0.01:
-                    self.move_function_xy(0,1)
+                    self.move_function_xy(0, 1)
                 else:
-                    self.move_function_xy(0.8,0)
+                    self.move_function_xy(0.8, 0)
                     self.grasp_cube()
 
         # if distance > 0.18:

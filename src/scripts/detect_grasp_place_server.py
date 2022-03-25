@@ -60,15 +60,33 @@ class detect_grasp_place_server():
                 self.place_flag = False
                 print('req.number:', req.number)
                 self.request_nubmer = req.number
-                # self.target_number = self.toServer.case2_number_class()
-                # self.target_number_pose = self.toServer.case2_number_pose()
-                # self.target_numbers,self.target_numbers_pose=self.toServer.case3_box_class_pose('box')
-                # if self.target_number_pose.shape[0] == 4:
                 print('Ready to place')
                 self.start_place()
             except Exception:
                 print('zhou postion is not right')
-                self.toServer.grasp_place.move_left_by_distance(0.2)
+                numbers_pose = []
+                self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
+                    'box')
+                while len(self.target_numbers) != 3:
+                    print('box is not 3,is:', len(self.target_numbers))
+                    self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
+                        'box')
+                    for i in range(len(self.target_numbers)):
+                        self.target_numbers[i] -= 5
+                    for pose in self.target_numbers_pose:
+                        numbers_pose.append(self.toServer.grasp_place.point2msg(
+                            pose))
+                    box_pose_dict = dict(
+                        zip(self.target_numbers, numbers_pose))
+                    if not 1 in box_pose_dict:
+                        self.toServer.grasp_place.move_left_by_distance(0.2)
+                        print('can not see b,move left')
+                    elif not 3 in box_pose_dict:
+                        self.toServer.grasp_place.move_right_by_distance(0.2)
+                        print('can not see x,move right')
+                    rospy.sleep(0.5)
+                    self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
+                        'box')
                 self.start_place()
             if self.place_flag:
                 self.place_flag = False
@@ -132,8 +150,6 @@ class detect_grasp_place_server():
         print("=====open gripper at beginning=====")
         self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
             'box')
-        if len(self.target_numbers) == 2:
-            self.toServer.grasp_place.move_left_by_distance(0.11)
         while not self.place_flag:
             self.toServer.pose_msg = self.toServer.case3_box_pose_ddd(
                 number_of_box)
