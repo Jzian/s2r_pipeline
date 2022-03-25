@@ -287,6 +287,26 @@ class grasp_cube_kevin():
         vel_cmd.angular.z = 0.0
         self.base_move_vel_pub.publish(vel_cmd)
 
+    def move_function_xy_ddd(self, x, y):
+        vel_cmd = Twist()
+        vel_cmd.linear.x = x * self.base_vel
+        vel_cmd.linear.y = y * self.base_vel
+        vel_cmd.linear.z = 0.0
+        vel_cmd.angular.x = 0.0
+        vel_cmd.angular.y = 0.0
+        vel_cmd.angular.z = 0.0
+        self.base_move_vel_pub.publish(vel_cmd)
+
+        rospy.sleep(0.03)
+        # motor STOP
+        vel_cmd.linear.x = 0.0
+        vel_cmd.linear.y = 0.0
+        vel_cmd.linear.z = 0.0
+        vel_cmd.angular.x = 0.0
+        vel_cmd.angular.y = 0.0
+        vel_cmd.angular.z = 0.0
+        self.base_move_vel_pub.publish(vel_cmd)
+
     def move_function_z(self, z):
         vel_cmd = Twist()
         vel_cmd.linear.x = 0.0

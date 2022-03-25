@@ -261,7 +261,7 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
 {
     geometry_msgs::Twist pose;     
     geometry_msgs::Pose2D currentpose;
-    double dth,Cth,Tth ,turn;       
+    double dx,dy,dth,Cth,Tth ,turn;       
     currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);                
     dth = currentpose.theta - PoseTarget.theta;
     Cth = currentpose.theta;
@@ -300,6 +300,17 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
         dth = currentpose.theta - PoseTarget.theta;
     }
     Move_cmd_Stop();
+    currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
+    dx = PoseTarget.x - currentpose.x;
+    dy = PoseTarget.y - currentpose.y; // dy>0 left
+    pose.linear.x = dx/2;
+    pose.linear.y = dy/2;
+    pose.linear.z = 0;
+    pose.angular.x = 0;
+    pose.angular.y = 0;
+    pose.angular.z = 0;
+    pub_move_cmd.publish(pose);
+
     // pose.linear.x = poseIn.linear.x;
     // pose.linear.y = poseIn.linear.y;
     // pose.linear.z = poseIn.linear.z;
@@ -307,7 +318,6 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
     // pose.angular.y = poseIn.angular.y;
     // pose.angular.z = poseIn.angular.z;
     // pub_move_cmd.publish(pose);
-
 }
 
 void EP_Nav::Move_cmd_Stop()
@@ -326,12 +336,12 @@ EP_Nav::Posearray EP_Nav::PoseSet()
 {
     EP_Nav::Posearray posearray{};
     posearray.x[0] = 0.871 ,posearray.y[0] = 1.55, posearray.th[0] = 0.00;    //Box
-    posearray.x[1] = 0.721 ,posearray.y[1] = 3.17, posearray.th[1] = -3.13;    //num1
-    posearray.x[2] = 0.382 ,posearray.y[2] = 2.827, posearray.th[2] = -1.287;    //num2
+    posearray.x[1] = 0.633 ,posearray.y[1] = 3.18, posearray.th[1] = -3.13;    //num1
+    posearray.x[2] = 0.384 ,posearray.y[2] = 2.9, posearray.th[2] = -1.57;    //num2
     // posearray.x[3] = 2.504 ,posearray.y[3] = 2.441, posearray.th[3] = 1.599;    //num3
-    posearray.x[3] = 2.08 ,posearray.y[3] = 2.60, posearray.th[3] = 0.048;    //num3
-    posearray.x[4] = 2.403 ,posearray.y[4] = 0.321, posearray.th[4] = -3.091;    //num4
-    posearray.x[5] = 2.66 ,posearray.y[5] = -0.868, posearray.th[5] = 0.00;   //num5
+    posearray.x[3] = 2.0 ,posearray.y[3] = 2.68, posearray.th[3] = 0.0;    //num3
+    posearray.x[4] = 2.22 ,posearray.y[4] = 0.014, posearray.th[4] = -3.13;    //num4
+    posearray.x[5] = 2.69 ,posearray.y[5] = -0.859, posearray.th[5] = 0.00;   //num5
     posearray.x[6] = 0.167 ,posearray.y[6] = 1.512, posearray.th[6] = 0.00;  //detect GoalNums
     return posearray;
 }

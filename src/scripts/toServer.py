@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 from get_number_pose_1 import get_number_pose_1
-from get_number_pose_1 import get_box_pose_ddd, get_box_pose_ddd_pre
+from get_number_pose_1 import get_box_pose_ddd
 from get_number_class_1 import get_number_class_1
 from get_number_class_pose_3 import get_number_class_pose_3
 
@@ -20,7 +20,6 @@ class toServer():
         # self.case2_number_pose = get_number_pose_ddd
         self.case2_number_pose = get_number_pose_1
         self.case3_box_pose_ddd = get_box_pose_ddd
-        self.case3_box_pose_pre = get_box_pose_ddd_pre
         self.case3_box_class_pose = get_number_class_pose_3
         self.pub_pose = rospy.Publisher('aruco_pose', Pose, queue_size=1)
         self.place = placeAruco()
@@ -37,4 +36,3 @@ class toServer():
             dtype="double")
         self.dist_coeffs = np.array([[0, 0, 0, 0]], dtype="double")
         self.pose_msg = Pose()
-
