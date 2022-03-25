@@ -31,6 +31,7 @@ class detect_grasp_place_server():
         self.place_box_number = 0
         self.judge_state_distance = 0
         self.judge_state_center = 0
+        self.grasp_position_fit_flag = False
 
     def targetCallback(self, req):
         print(req.work_case)
@@ -79,6 +80,9 @@ class detect_grasp_place_server():
             self.grasp_kevin(req.number)
             self.judge_state_distance = 0
             self.judge_state_center = 0
+            if self.grasp_position_fit_flag:
+                self.grasp_position_fit_flag = False
+                return TargetNumberResponse(True, 7, 7, 7)
             return TargetNumberResponse(True, 9, 9, 9)
         elif req.work_case == 3:
             place_number = req.number
@@ -163,12 +167,18 @@ class detect_grasp_place_server():
                 if self.toServer.case2_number_pose()[:, 0, :].shape[0] != 4 and self.judge_state_distance > 20:
                     self.toServer.grasp_place.move_forward_by_distance(0.1)
                     print('not ready to grasp,but one frame is lost')
-                elif self.toServer.case2_number_pose()[:, 0, :].shape[0] != 4 and self.judge_state_center < 0:
+                    self.grasp_position_fit_flag = True
+                    return True
+                elif self.toServer.case2_number_pose()[:, 0, :].shape[0] != 4 and self.judge_state_center < 0 and self.judge_state_distance < 20:
                     print('ready to grasp cube,but can not see the cube')
                     self.toServer.grasp_place.move_right_by_distance(0.1)
-                elif self.toServer.case2_number_pose()[:, 0, :].shape[0] != 4 and self.judge_state_center > 0:
+                    self.grasp_position_fit_flag = True
+                    return True
+                elif self.toServer.case2_number_pose()[:, 0, :].shape[0] != 4 and self.judge_state_center > 0 and self.judge_state_distance < 20:
                     print('ready to grasp cube,but can not see the cube')
                     self.toServer.grasp_place.move_left_by_distance(0.1)
+                    self.grasp_position_fit_flag = True
+                    return True
             finally:
                 if self.toServer.grasp_place.grasp_success:
                     self.grasp_flag = True
