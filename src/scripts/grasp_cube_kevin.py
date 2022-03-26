@@ -371,7 +371,7 @@ class grasp_cube_kevin():
     def forward_to_cube(self, center, distance, orientation):
         _, r, _ = self.q2e(orientation)
         mid = 0.037
-        print(r)
+        # print(r)
         if center > mid + 0.03:
             self.move_function_xy(0, -1)
         elif center < mid - 0.03:

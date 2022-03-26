@@ -365,7 +365,7 @@ class placeAruco:
             return
 
         gama_x = 0.003
-        gama_y = 0.008
+        gama_y = 0.009
 
         tvec = [0, 0, 0]
         tvec[0] = data.position.x
@@ -380,15 +380,15 @@ class placeAruco:
 
         _, rotate_goal, _ = self.q2e(rvec)
 
-        goal = [0.0337, 0.0, 0.2]
+        goal = [0.0305, 0.0, 0.2]
         distance_in_x = tvec[2] - goal[2]
         distance_in_y = tvec[0] - goal[0]
-        print("distance in x", distance_in_x)
-        print("distance in y", distance_in_y)
+        # print("distance in x", distance_in_x)
+        # print("distance in y", distance_in_y)
 
         if (distance_in_x <= gama_x) and (abs(distance_in_y) <= gama_y) and (abs(rotate_goal) < 1.3):
             # step forward
-            self.move_base_velocity_x(b_vector=0.2, duration=12)
+            self.move_base_velocity_x(b_vector=0.2, duration=13)
 
             print("===== start placing ====")
             # self.reset_arm()

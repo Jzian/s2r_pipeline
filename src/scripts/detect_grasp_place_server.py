@@ -170,7 +170,11 @@ class detect_grasp_place_server():
         self.toServer.grasp_place.set_arm()
         while not self.grasp_flag:
             try:
-                self.target_number_pose = self.toServer.case2_number_pose()
+                if self.toServer.case3_box_class_pose('number2')[0][0] == 2:
+                    self.target_number_pose = self.toServer.case3_box_class_pose('number2')[
+                        1][0]
+                else:
+                    self.target_number_pose = self.toServer.case2_number_pose()
                 pose = self.target_number_pose
                 self.toServer.grasp_place.pose_msg = self.toServer.grasp_place.point2msg(
                     pose)
@@ -179,12 +183,14 @@ class detect_grasp_place_server():
                 distance = self.toServer.grasp_place.pose_msg.position.z
                 self.judge_state_distance = distance
                 self.judge_state_center = center
-                print(center, distance)
+                # print(center, distance)
                 self.toServer.grasp_place.forward_to_cube(
                     center, distance, self.toServer.grasp_place.pose_msg.orientation)
             except Exception as e:
                 print('the img is wrong')
-                if self.toServer.case2_number_pose()[:, 0, :].shape[0] != 4 and self.judge_state_distance > 0.20:
+                self.toServer.grasp_place.move_forward_by_distance(-1.5)
+                rospy.sleep(0.5)
+                if self.toServer.case2_number_pose()[:, 0, :].shape[0] != 4 and self.judge_state_distance > 0.20 and self.toServer.case2_number_class() != 2:
                     self.toServer.grasp_place.move_forward_by_distance(0.1)
                     rospy.sleep(1)
                     print('not ready to grasp,but one frame is lost')
@@ -199,6 +205,9 @@ class detect_grasp_place_server():
                     self.toServer.grasp_place.move_function_z(1)
                     self.toServer.grasp_place.move_forward_by_distance(-0.1)
                     self.grasp_position_fit_flag = True
+                if self.toServer.case2_number_class() == 2:
+                    print('the number is 2,fkfkfkfk')
+                    self.toServer.grasp_place.move_forward_by_distance(0.11)
             finally:
                 if self.toServer.grasp_place.grasp_success:
                     self.grasp_flag = True

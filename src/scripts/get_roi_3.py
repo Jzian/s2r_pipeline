@@ -53,7 +53,26 @@ def get_roi_3(img, method_flag='target_number'):
         img = cv2.resize(img, (3 * w, h))
     elif method_flag == 'box':
         flag = method['Color']
-    if flag:
+    if method_flag == 'number2':
+        # 色彩方法 start
+        gs_frame = cv2.GaussianBlur(img, (3, 3), 1)  # 高斯模糊
+        # cv2.imwrite('./output/01 高斯模糊.png', gs_frame)
+        hsv = cv2.cvtColor(gs_frame, cv2.COLOR_BGR2HSV)  # 转化成HSV图像
+        # cv2.imwrite('./output/02 hsv.png', hsv)
+        erode_hsv = cv2.erode(
+            hsv, kernel=np.ones((2, 2), np.uint8), iterations=1)  # 腐蚀 粗的变细
+        # cv2.imwrite('./output/03 腐蚀.png', erode_hsv)
+        inRange_hsv = cv2.inRange(
+            erode_hsv, np.array([0, 180, 70]), np.array([3, 200, 100]))  # 除去对应颜色形状之外的背景
+        # cv2.imwrite('./output/04 去色.png', inRange_hsv)
+        cannyPic = cv2.Canny(inRange_hsv, 600, 800)
+        # cv2.imwrite('./output/05 canny.png', cannyPic)
+        # 色彩方法 end
+    contours = cv2.findContours(
+        cannyPic, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]  # 找轮廓
+    pic_contours = cv2.drawContours(
+        img.copy(), contours, -1, (255, 0, 0), 1)
+    if flag and method_flag != 'number2':
         # 传统方法start
         greyPic = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # 转化为灰度图
         # cv2.imwrite('./output/01 灰度.png', greyPic)
@@ -64,7 +83,7 @@ def get_roi_3(img, method_flag='target_number'):
         cannyPic = cv2.Canny(binPic, 300, 500)  # canny
         # cv2.imwrite('./output/04 canny.png', cannyPic)
         # 传统方法end
-    if not flag:
+    if not flag and method_flag != 'number2':
         # 色彩方法 start
         gs_frame = cv2.GaussianBlur(img, (3, 3), 1)  # 高斯模糊
         # cv2.imwrite('./output/01 高斯模糊.png', gs_frame)

@@ -314,7 +314,7 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
     {
         currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
         dx = PoseTarget.x - currentpose.x ;
-        std::cout << "dx = : " << dx << std::endl;
+        // std::cout << "dx = : " << dx << std::endl;
         if(PoseTarget.theta < -3)
         {
             if(currentpose.x + midx < PoseTarget.x + midx) 
@@ -338,7 +338,7 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
         }
 
         dy = PoseTarget.y - currentpose.y  ; // dy>0 left
-        std::cout << "dy = : " << dy << std::endl;
+        // std::cout << "dy = : " << dy << std::endl;
         if(PoseTarget.theta < -3)
         {
             if(currentpose.y + midy < PoseTarget.y + midy)
