@@ -3,3 +3,12 @@
 .vscode/browse.vc.db-wal
 .vscode/c_cpp_properties.json
 .vscode/settings.json
+src/scripts/__pycache__/get_number_class_1.cpython-38.pyc
+src/scripts/__pycache__/get_number_class_pose_3.cpython-38.pyc
+src/scripts/__pycache__/get_number_pose_1.cpython-38.pyc
+src/scripts/__pycache__/get_roi_1.cpython-38.pyc
+src/scripts/__pycache__/get_roi_3.cpython-38.pyc
+src/scripts/__pycache__/grasp_cube_kevin.cpython-38.pyc
+src/scripts/__pycache__/place_cube_ddd.cpython-38.pyc
+src/scripts/__pycache__/predict.cpython-38.pyc
+src/scripts/__pycache__/toServer.cpython-38.pyc

@@ -388,7 +388,7 @@ class placeAruco:
 
         if (distance_in_x <= gama_x) and (abs(distance_in_y) <= gama_y) and (abs(rotate_goal) < 1.3):
             # step forward
-            self.move_base_velocity_x(b_vector=0.2, duration=16)
+            self.move_base_velocity_x(b_vector=0.2, duration=12)
 
             print("===== start placing ====")
             # self.reset_arm()
