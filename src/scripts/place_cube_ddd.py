@@ -122,7 +122,7 @@ class placeAruco:
 
     def forward_minimum_x(self):
         vel_cmd = Twist()
-        vel_cmd.linear.x = 0.11
+        vel_cmd.linear.x = 0.109
         vel_cmd.linear.y = 0.0
         vel_cmd.linear.z = 0.0
         vel_cmd.angular.x = 0.0
@@ -388,8 +388,9 @@ class placeAruco:
 
         if (distance_in_x <= gama_x) and (abs(distance_in_y) <= gama_y) and (abs(rotate_goal) < 1.3):
             # step forward
-            self.move_base_velocity_x(b_vector=0.2, duration=13)
-
+            self.move_base_velocity_x(b_vector=0.20, duration=14)
+            # print(distance_in_x)
+            # self.move_forward_by_distance(abs(distance_in_x)*100)
             print("===== start placing ====")
             # self.reset_arm()
             # rospy.sleep(0.2)
@@ -423,7 +424,7 @@ class placeAruco:
             #     self.move_function_xy(0, 1)
             # elif abs(distance_in_y) <= gama_y and distance_in_y > 0:
             #     self.move_function_xy(0, -1)
-            print("rotate_goal", rotate_goal)
+            # print("rotate_goal", rotate_goal)
             if rotate_goal > 1.3:
                 self.move_function_z(-0.5)
                 pass

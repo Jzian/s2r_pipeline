@@ -218,7 +218,7 @@ bool EP_Nav::ArrivalGoal(geometry_msgs::Pose2D PoseTarget)
     dy = std::abs(currentpose.y - PoseTarget.y);
     dth = currentpose.theta - PoseTarget.theta;
     //std::cout << "isarrival?" << std::endl;
-    if(dx < 0.1 && dy < 0.1)
+    if(dx < 0.2 && dy < 0.2)
     {
         arrival = true;
     }
@@ -515,13 +515,13 @@ void EP_Nav::run()
         Point2d = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);
         if(Point2d.theta > 0 && Point2d.theta < 1.57)
         {
-            if(Point2d.x < 1.87 && Point2d.x > 1.47 && Point2d.y < 2.42 && Point2d.y > 2.02)
+            if(Point2d.x < 1.97 && Point2d.x > 1.350 && Point2d.y < 2.42 && Point2d.y > 1.95)
             {
                 pose.linear.x = 0;
                 pose.linear.y = 0.1;
                 pub_move_cmd.publish(pose);
             }
-            else if(Point2d.x < 1.15 && Point2d.x > 0.75 && Point2d.y < 2.02 && Point2d.y > 1.62)
+            else if(Point2d.x < 1.25 && Point2d.x > 0.65 && Point2d.y < 1.95 && Point2d.y > 1.62)
             {
                 pose.linear.x = 0;
                 pose.linear.y = -0.1;
@@ -530,13 +530,13 @@ void EP_Nav::run()
         }
         if(Point2d.theta < -1.57 && Point2d.theta > -3.1)
         {
-            if(Point2d.x < 1.87 && Point2d.x > 1.47 && Point2d.y < 2.42 && Point2d.y > 2.02)
+            if(Point2d.x < 1.97 && Point2d.x > 1.35 && Point2d.y < 2.42 && Point2d.y > 2.02)
             {
                 pose.linear.x = 0;
                 pose.linear.y = -0.1;
                 pub_move_cmd.publish(pose);
             }
-            else if(Point2d.x < 1.15 && Point2d.x > 0.75 && Point2d.y < 2.02 && Point2d.y > 1.62)
+            else if(Point2d.x < 1.25 && Point2d.x > 0.65 && Point2d.y < 2.02 && Point2d.y > 1.62)
             {
                 pose.linear.x = 0;
                 pose.linear.y = 0.1;
