@@ -471,7 +471,6 @@ void EP_Nav::run()
             {
                 if(Arrivalxy(Target3point))
                 {
-                    GoOnce = true;
                     threeTransFlag = true;                    
                 }
             }            
@@ -479,6 +478,7 @@ void EP_Nav::run()
             {
                 GotoTarget(pose_targets, TagetNumArray[NUMS]);
                 newGoal = false;
+                
                 std::cout << "nums: " << NUMS << "; targetnum: "<< TagetNumArray[NUMS] << std::endl;
                 GraspFlag = true;
             }
@@ -504,22 +504,25 @@ void EP_Nav::run()
         {
             if(TagetNumArray[NUMS] == 3 && GoPutOnce)
             {
+                std::cout<<"put3back"<<std::endl;
                 GoPutOnce = false;
                 threePutFlag = false;
-                GotoTarget(pose_targets,7);
-                Target3point = ToPose(pose_targets,7); 
+                GotoTarget(pose_targets, 7);
+                Target3point = ToPose(pose_targets, 7 ); 
             }
             if (!GoPutOnce)
             {
+                std::cout<<"judge 3 put back"<<std::endl;
                 if(Arrivalxy(Target3point))
                 {
-                    GoPutOnce = true;
+                    std::cout<<"arrive 3 back"<<std::endl;
                     threePutFlag = true;                    
                 }
             }   
             //navCore->cancelAllGoals();
             if (ToPut && threePutFlag)
             {
+    
                 GotoTarget(pose_targets,0);
                 ToPut = false;
                 std::cout << "gotozero" << std::endl;
@@ -539,7 +542,9 @@ void EP_Nav::run()
                     std::cout << "putdone:next goal"  << std::endl;
                     PutFlag = false;
                     newGoal = true;
+                    GoOnce = true;
                     PutOnce = true;
+                    GoPutOnce = true;
                     if (NUMS < TagetNumArray.size())
                     {
                         NUMS++;
