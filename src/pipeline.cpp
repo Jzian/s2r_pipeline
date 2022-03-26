@@ -307,10 +307,10 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
         dth = currentpose.theta - PoseTarget.theta;
     }
     Move_cmd_Stop();
-        currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
+    currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
     dx = PoseTarget.x - currentpose.x  ;
     dy = PoseTarget.y - currentpose.y  ; // dy>0 left
-    while(abs(dx) > 0.07)
+    while(abs(dx) > 0.05)
     {
         currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
         dx = PoseTarget.x - currentpose.x ;
@@ -435,7 +435,7 @@ EP_Nav::Posearray EP_Nav::PoseSet()
     posearray.x[4] = 2.22 ,posearray.y[4] = 0.014, posearray.th[4] = -3.13;    //num4
     posearray.x[5] = 2.69 ,posearray.y[5] = -0.859, posearray.th[5] = 0.00;   //num5
     posearray.x[6] = 0.167 ,posearray.y[6] = 1.512, posearray.th[6] = 0.00;  //detect GoalNums
-    posearray.x[7] = 1.35 ,posearray.y[7] = 2.67, posearray.th[7] = 0;
+    posearray.x[7] = 1.25 ,posearray.y[7] = 2.61, posearray.th[7] = 0;
     return posearray;
 }
 
