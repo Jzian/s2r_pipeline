@@ -163,10 +163,50 @@ class detect_grasp_place_server():
 
         self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
             'box')
-        while(len(self.target_numbers) <= 2):
-            print('correct_by_kevin')
-            self.toServer.grasp_place.move_function_z(0.2)
-            self.toServer.grasp_place.move_function_xy_ddd(0, 3)
+        # while(len(self.target_numbers) <= 2):
+        #     print('correct_by_kevin')
+        #     self.toServer.grasp_place.move_function_z(0.2)
+        #     self.toServer.grasp_place.move_function_xy_ddd(0, 3)
+        #     self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
+        #         'box')
+
+        self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
+            'box')
+        while len(self.target_numbers) != 3:
+            numbers_pose = []
+            numbers_distance = []
+            numbers_center = []
+            print('box is not 3,is:', len(self.target_numbers))
+            self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
+                'box')
+            for i in range(len(self.target_numbers)):
+                self.target_numbers[i] -= 5
+            for pose in self.target_numbers_pose:
+                self.toServer.pose_msg = self.toServer.grasp_place.point2msg(
+                    pose)
+                numbers_pose.append(self.toServer.pose_msg.orientation)
+                numbers_distance.append(
+                    self.toServer.pose_msg.position.z)
+                numbers_center.append(self.toServer.pose_msg.position.x)
+            box_pose_dict = dict(
+                zip(self.target_numbers, numbers_pose))
+            average_distance = np.mean(numbers_distance)
+            box_center_dict = dict(
+                zip(self.target_numbers, numbers_center))
+            print(average_distance)
+            if not 1 in box_pose_dict:
+                self.toServer.grasp_place.move_left_by_distance(0.2)
+                print('can not see b,move left')
+            elif not 3 in box_pose_dict:
+                self.toServer.grasp_place.move_right_by_distance(0.2)
+                print('can not see x,move right')
+            if average_distance < 0.3:
+                self.toServer.grasp_place.move_forward_by_distance(-0.32)
+                print('im too close to the box')
+                if box_center_dict[1] > 0:
+                    self.toServer.grasp_place.move_right_by_distance(0.1)
+                    print('o is on my right ,move right')
+            rospy.sleep(1)
             self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
                 'box')
         # if len(self.target_numbers)<=2:
