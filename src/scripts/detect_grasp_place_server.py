@@ -55,43 +55,6 @@ class detect_grasp_place_server():
                 self.grasp_flag = False
                 print('Finish grasp')
                 return TargetNumberResponse(True, self.target_numbers[0], self.target_numbers[1], self.target_numbers[2])
-        # elif req.work_case == 6:
-        #     try:
-        #         self.place_flag = False
-        #         print('req.number:', req.number)
-        #         self.request_nubmer = req.number
-        #         print('Ready to place')
-        #         self.start_place()
-        #     except Exception:
-        #         print('zhou postion is not right')
-        #         numbers_pose = []
-        #         self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
-        #             'box')
-        #         while len(self.target_numbers) != 3:
-        #             print('box is not 3,is:', len(self.target_numbers))
-        #             self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
-        #                 'box')
-        #             for i in range(len(self.target_numbers)):
-        #                 self.target_numbers[i] -= 5
-        #             for pose in self.target_numbers_pose:
-        #                 numbers_pose.append(self.toServer.grasp_place.point2msg(
-        #                     pose))
-        #             box_pose_dict = dict(
-        #                 zip(self.target_numbers, numbers_pose))
-        #             if not 1 in box_pose_dict:
-        #                 self.toServer.grasp_place.move_left_by_distance(0.2)
-        #                 print('can not see b,move left')
-        #             elif not 3 in box_pose_dict:
-        #                 self.toServer.grasp_place.move_right_by_distance(0.2)
-        #                 print('can not see x,move right')
-        #             rospy.sleep(1)
-        #             self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
-        #                 'box')
-        #         self.start_place()
-        #     if self.place_flag:
-        #         self.place_flag = False
-        #         print('send place success')
-        #         return TargetNumberResponse(True, 9, 9, 9)
         elif req.work_case == 6:
             try:
                 self.place_flag = False
@@ -102,6 +65,7 @@ class detect_grasp_place_server():
             except Exception:
                 print('zhou postion is not right')
                 numbers_pose = []
+                numbers_distance = []
                 self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
                     'box')
                 while len(self.target_numbers) != 3:
@@ -113,9 +77,13 @@ class detect_grasp_place_server():
                     for pose in self.target_numbers_pose:
                         self.toServer.pose_msg = self.toServer.grasp_place.point2msg(
                             pose)
-
+                        numbers_pose.append(self.toServer.pose_msg.orientation)
+                        numbers_distance.append(
+                            self.toServer.pose_msg.position.z)
                     box_pose_dict = dict(
                         zip(self.target_numbers, numbers_pose))
+                    average_distance = np.mean(numbers_distance)
+                    print(average_distance)
                     if not 1 in box_pose_dict:
                         self.toServer.grasp_place.move_left_by_distance(0.2)
                         print('can not see b,move left')
@@ -196,8 +164,9 @@ class detect_grasp_place_server():
         self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
             'box')
         while(len(self.target_numbers) <= 2):
+            print('correct_by_kevin')
             self.toServer.grasp_place.move_function_z(0.2)
-            self.toServer.grasp_place.move_function_xy_ddd(0, 1)
+            self.toServer.grasp_place.move_function_xy_ddd(0, 3)
             self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
                 'box')
         # if len(self.target_numbers)<=2:
@@ -206,6 +175,7 @@ class detect_grasp_place_server():
 
         while(self.toServer.case3_box_pose_ddd
               (number_of_box).position.z > 0.6):
+            print('correct_by_ddd')
             self.toServer.grasp_place.move_function_xy_ddd(3, 0)
 
         while not self.place_flag:
