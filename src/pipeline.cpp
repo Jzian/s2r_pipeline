@@ -218,7 +218,7 @@ bool EP_Nav::ArrivalGoal(geometry_msgs::Pose2D PoseTarget)
     dy = std::abs(currentpose.y - PoseTarget.y);
     dth = currentpose.theta - PoseTarget.theta;
     //std::cout << "isarrival?" << std::endl;
-    if(dx < 0.2 && dy < 0.2)
+    if(dx < 0.25 && dy < 0.25)
     {
         arrival = true;
     }
@@ -269,7 +269,7 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
     double dx,dy,dth,Cth,Tth ,turn,midx,midy,speed;
     midx = 0.336;
     midy = 1.2; 
-    speed = 0.11;      
+    speed = 0.35;      
     currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);                
     dth = currentpose.theta - PoseTarget.theta;
     Cth = currentpose.theta;
@@ -312,7 +312,7 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
     currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
     dx = PoseTarget.x - currentpose.x  ;
     dy = PoseTarget.y - currentpose.y  ; // dy>0 left
-    while(abs(dx) > 0.05)
+    while(abs(dx) > 0.01 && abs(dy) > 0.01)
     {
         currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
         dx = PoseTarget.x - currentpose.x ;
@@ -435,13 +435,15 @@ void EP_Nav::Move_cmd_Stop()
 EP_Nav::Posearray EP_Nav::PoseSet()
 {
     EP_Nav::Posearray posearray{};
-    posearray.x[0] = 1.01 ,posearray.y[0] = 1.73, posearray.th[0] = 0.00;    //Box
+    posearray.x[0] = 0.99 ,posearray.y[0] = 1.65, posearray.th[0] = 0.00;    //Box
     posearray.x[1] = 0.633 ,posearray.y[1] = 3.18, posearray.th[1] = -3.13;    //num1
     posearray.x[2] = 0.384 ,posearray.y[2] = 2.9, posearray.th[2] = -1.57;    //num2
     // posearray.x[3] = 2.504 ,posearray.y[3] = 2.441, posearray.th[3] = 1.599;    //num3
     posearray.x[3] = 2.0 ,posearray.y[3] = 2.68, posearray.th[3] = 0.0;    //num3
     posearray.x[4] = 2.22 ,posearray.y[4] = 0.014, posearray.th[4] = -3.13;    //num4
-    posearray.x[5] = 2.6 ,posearray.y[5] = -0.864, posearray.th[5] = 0;   //num5
+    // posearray.x[5] = 2.6 ,posearray.y[5] = -0.864, posearray.th[5] = 0;   //num5
+    posearray.x[5] = 2.54 ,posearray.y[5] = -0.768, posearray.th[5] = 0;   //num5
+     
     posearray.x[6] = 0.167 ,posearray.y[6] = 1.512, posearray.th[6] = 0.00;  //detect GoalNums
     posearray.x[7] = 1.25 ,posearray.y[7] = 2.61, posearray.th[7] = 0;
     posearray.x[8] = 1.17 ,posearray.y[8] = 0.977, posearray.th[8] = 0;
@@ -528,7 +530,7 @@ void EP_Nav::run()
                 pub_move_cmd.publish(pose);                
             }
         }
-        if(Point2d.theta < -1.57 && Point2d.theta > -3.1)
+        else if(Point2d.theta < -1.57 && Point2d.theta > -3.1)
         {
             if(Point2d.x < 1.97 && Point2d.x > 1.35 && Point2d.y < 2.42 && Point2d.y > 2.02)
             {
@@ -543,7 +545,7 @@ void EP_Nav::run()
                 pub_move_cmd.publish(pose);                
             }
         }
-        if(Point2d.theta < 0 && Point2d.theta > -1.57)
+        else if(Point2d.theta < 0 && Point2d.theta > -1.57)
         {
             if(Point2d.x < 1.9 && Point2d.x > 1.5 && Point2d.y < 1.42 && Point2d.y > 1.02)
             {
@@ -558,7 +560,7 @@ void EP_Nav::run()
                 pub_move_cmd.publish(pose);                
             }
         }
-        if(Point2d.theta < 3 && Point2d.theta > 1.57)
+        else if(Point2d.theta < 3 && Point2d.theta > 1.57)
         {
             if(Point2d.x < 1.9 && Point2d.x > 1.5 && Point2d.y < 1.42 && Point2d.y > 1.02)
             {
@@ -566,12 +568,18 @@ void EP_Nav::run()
                 pose.linear.y = 0.1;
                 pub_move_cmd.publish(pose);
             }
-            else if(Point2d.x < 1.84 && Point2d.x > 1.44 && Point2d.y < 0.72 && Point2d.y > 0.32)
+            else if(Point2d.x < 1.84 && Point2d.x > 1.44 && Point2d.y < 0.9 && Point2d.y > 0.32)
             {
                 pose.linear.x = 0;
                 pose.linear.y = -0.1;
                 pub_move_cmd.publish(pose);                
             }
+            
+        }
+        else
+        {
+            pose.linear.x = 0.2;
+            pub_move_cmd.publish(pose);        
         }
         GotoTarget(pose_targets, Aborted_targetSet);
     }
