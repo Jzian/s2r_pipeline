@@ -70,7 +70,7 @@ private:
     geometry_msgs::Pose2D Target;
     geometry_msgs::Pose2D Target3point;
     bool TargetGetFlag{false},newGoal{true},DetectFlag{false},done{false},PutFlag{false},arrival{false};
-    bool GraspFlag{false},ToPut{false},PutOnce{true},threeTransFlag{true},threePutFlag{true},GoOnce{true};
+    bool GraspFlag{false},ToPut{false},PutOnce{true},threeTransFlag{true},threePutFlag{true},GoOnce{true},GoPutOnce{true};
     ros::Publisher log_pub;
     ServiceCaller* serviceCaller;
     ros::Subscriber subTarget;
@@ -502,18 +502,18 @@ void EP_Nav::run()
         }          
         if(PutFlag)
         {
-            if(TagetNumArray[NUMS] == 3 && GoOnce)
+            if(TagetNumArray[NUMS] == 3 && GoPutOnce)
             {
-                GoOnce = false;
+                GoPutOnce = false;
                 threePutFlag = false;
                 GotoTarget(pose_targets,7);
                 Target3point = ToPose(pose_targets,7); 
             }
-            if (!GoOnce)
+            if (!GoPutOnce)
             {
                 if(Arrivalxy(Target3point))
                 {
-                    GoOnce = true;
+                    GoPutOnce = true;
                     threePutFlag = true;                    
                 }
             }   
