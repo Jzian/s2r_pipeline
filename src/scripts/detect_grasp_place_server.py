@@ -168,26 +168,6 @@ class detect_grasp_place_server():
         rate.sleep()
 
     def point_list_max_top(self, point_list):
-        def extract_roi(img, lsPointsChoose):
-
-            mask = np.zeros(img.shape, np.uint8)
-            pts = np.array(lsPointsChoose, np.int32)  # pts是多边形的顶点列表（顶点集）
-            col0 = pts[:, 0]
-            col1 = pts[:, 1]
-            x1 = np.min(col0)
-            y1 = np.min(col1)
-            x2 = np.max(col0)
-            y2 = np.max(col1)
-            pts = pts.reshape((-1, 1, 2))
-            # 这里 reshape 的第一个参数为-1, 表明这一维的长度是根据后面的维度的计算出来的。
-            # OpenCV中需要先将多边形的顶点坐标变成顶点数×1×2维的矩阵，再来绘制
-
-            # --------------画多边形---------------------
-            mask = cv2.polylines(mask, [pts], True, (255, 255, 255))
-            # -------------填充多边形---------------------
-            mask2 = cv2.fillPoly(mask, [pts], (255, 255, 255))
-            ROI = cv2.bitwise_and(mask2, img)
-            return ROI[y1:y2, x1:x2]
         area_size_max = 0  # 面积最大区域中间量
         area_size_list = []  # 所有区域的面积列表
         for cnt in point_list:
@@ -195,35 +175,15 @@ class detect_grasp_place_server():
             area_size_list.append(current_area_size)
             if current_area_size > area_size_max:
                 area_size_max = current_area_size
-        # if number == 3:
         top_index = sorted(
             range(len(area_size_list)), key=lambda k: area_size_list[k])
         top_index.reverse()
-        top_size = [area_size_list[i] for i in top_index]
-        contours_top = [point_list[i] for i in top_index]
-        # else:
-        #     pic_contours_filter = cv2.drawContours(
-        #         img.copy(), [contours[top_size[0]]], -1, (0, 0, 255), 1)
-
-        # cv2.imwrite('./output/06 最大轮廓.png', pic_contours_filter)
-        roi = []
         roi_box = []
-        bridge = CvBridge()
-        data = rospy.wait_for_message('/camera/color/image_raw', Image)
-        try:
-            cv_image = bridge.imgmsg_to_cv2(data, "bgr8")
-        except CvBridgeError as err:
-            print(err)
         for i, num in enumerate(top_index):
             if area_size_list[num] > 400:
-                roi_temp = extract_roi(
-                    cv_image.copy(), point_list[num].squeeze())
-                # cv2.imwrite('./output/07 抠图.png', roi_temp)
-                roi.append(roi_temp)
                 roi_box_temp = cv2.approxPolyDP(
                     point_list[num], 3, True)
-                roi_box.append(roi_box_temp)  # 多边形拟合
-                # cv2.imwrite('./output/08 抠图方' + str(i) + '.png', roi_box1)
+                roi_box.append(roi_box_temp)
         numbers_sort = []
         roi_size = []
         for p in roi_box:
@@ -239,7 +199,7 @@ class detect_grasp_place_server():
         for i, sub_roi_size_index in enumerate(roi_size_index):
             for sub_numbers_sort_index in numbers_sort_index:
                 if sub_numbers_sort_index == sub_roi_size_index:
-                    return roi[roi_size_index[i]], roi_box[roi_size_index[i]]
+                    return roi_box[roi_size_index[i]]
 
     def grasp_kevin(self, number):
         self.grasp_flag = False
@@ -259,10 +219,11 @@ class detect_grasp_place_server():
                 #     pose)
                 if number == 2:
                     point_list = get_number_pose_ddd()
-                    self.target_number_pose = self.point_list_max_top(point_list)[
-                        1]
+                    self.target_number_pose = self.point_list_max_top(
+                        point_list)
                     pose = self.target_number_pose
                 else:
+                    self.target_number_pose = self.toServer.case2_number_pose()
                     pose = self.target_number_pose
                 self.toServer.grasp_place.pose_msg = self.toServer.grasp_place.point2msg(
                     pose)
