@@ -1,4 +1,5 @@
 
+from dis import dis
 import math
 import rospy
 from geometry_msgs.msg import Twist, Point, Pose
@@ -196,6 +197,32 @@ class grasp_cube_kevin():
         self.pose_msg = self.tvec2msg(self.pose_msg, tvec_list, rvec_list)
         return self.pose_msg
 
+    def distance_funtion(self, distance):
+        d = distance*1
+        if (d > 0) and (d < 1):
+            d = 1
+        if (d < 0) and (d > -1):
+            d = -1
+        return d
+
+    def my_move_function(self, dx, dy):
+        vel_cmd = Twist()
+        vel_cmd.linear.x = dx * self.base_vel
+        vel_cmd.linear.y = -dy * self.base_vel
+        vel_cmd.linear.z = 0.0
+        vel_cmd.angular.x = 0.0
+        vel_cmd.angular.y = 0.0
+        vel_cmd.angular.z = 0.0
+        self.base_move_vel_pub.publish(vel_cmd)
+        rospy.sleep(0.01)
+        vel_cmd.linear.x = 0.0
+        vel_cmd.linear.y = 0.0
+        vel_cmd.linear.z = 0.0
+        vel_cmd.angular.x = 0.0
+        vel_cmd.angular.y = 0.0
+        vel_cmd.angular.z = 0.0
+        self.base_move_vel_pub.publish(vel_cmd)
+
     def sort_points(self, cnt):
         def cross(x1, y1, x2, y2):
             return x1*y2-x2*y1
@@ -267,7 +294,7 @@ class grasp_cube_kevin():
         self.open_gripper()
         rospy.sleep(0.5)
 
-    def move_function_xy(self, x, y):
+    def move_function_xy(self, x, y, time=0.01):
         vel_cmd = Twist()
         vel_cmd.linear.x = x * self.base_vel
         vel_cmd.linear.y = y * self.base_vel
@@ -276,8 +303,9 @@ class grasp_cube_kevin():
         vel_cmd.angular.y = 0.0
         vel_cmd.angular.z = 0.0
         self.base_move_vel_pub.publish(vel_cmd)
-
-        rospy.sleep(0.01)
+        print('move_x', x)
+        print('move_y', y)
+        rospy.sleep(time)
         # motor STOP
         vel_cmd.linear.x = 0.0
         vel_cmd.linear.y = 0.0
@@ -316,7 +344,7 @@ class grasp_cube_kevin():
         vel_cmd.angular.y = 0.0
         vel_cmd.angular.z = z
         self.base_move_vel_pub.publish(vel_cmd)
-
+        print('move z')
         rospy.sleep(0.01)
         # motor STOP
         vel_cmd.linear.x = 0.0
@@ -372,40 +400,69 @@ class grasp_cube_kevin():
         _, r, _ = self.q2e(orientation)
         mid = 0.037
         # print(r)
-        if center > mid + 0.03:
-            self.move_function_xy(0, -1)
-        elif center < mid - 0.03:
-            self.move_function_xy(0, 1)
-        elif distance > 0.35:
-            self.move_function_xy(1, 0)
-        else:
-            if r > 5:
-                self.move_function_z(-0.2)
-            elif r < -5:
-                self.move_function_z(0.2)
-            else:
-                if distance > 0.145:
-                    self.move_function_xy(1, 0)
-                elif center > mid + 0.01:
-                    self.move_function_xy(0, -1)
-                elif center < mid - 0.01:
-                    self.move_function_xy(0, 1)
-                else:
-                    self.move_function_xy(0.8, 0)
-                    self.grasp_cube()
-
-        # if distance > 0.18:
+        # if center > mid + 0.03:
+        #     self.move_function_xy(0, -1)
+        # elif center < mid - 0.03:
+        #     self.move_function_xy(0, 1)
+        # elif distance > 0.35:
         #     self.move_function_xy(1, 0)
-        # elif 0.14 < distance < 0.18:
-        #     if center > 0.003:
-        #         self.move_function_z(-0.5)
-        #     elif center < -0.003:
-        #         self.move_function_z(0.5)
+        # else:
+        #     if r > 5:
+        #         self.move_function_z(-0.2)
+        #     elif r < -5:
+        #         self.move_function_z(0.2)
         #     else:
-        #         self.move_forward_by_distance(0.1)
+        #         if distance > 0.145:
+        #             self.move_function_xy(1, 0)
+        #         elif center > mid + 0.01:
+        #             self.move_function_xy(0, -1)
+        #         elif center < mid - 0.01:
+        #             self.move_function_xy(0, 1)
+        #         else:
+        #             self.move_function_xy(0.8, 0)
+        #             self.grasp_cube()
+        gama_x = 0.135
+        gama_y = 0.009
+        rotate_goal = r
+        distance_in_y = center-mid
+        distance_in_x = distance
+        # print('distance_in_x', distance_in_x)
+        # print('distance_in_y', distance_in_y)
+        # print('rotate_goal', rotate_goal)
+        if (distance_in_x <= gama_x) and (abs(distance_in_y) <= gama_y and abs(rotate_goal) < 5.5):
+            self.move_function_xy(1, 0, 0.13)
+            self.grasp_cube()
+            self.place_success = True
 
-        # elif distance < 0.14:
-        #     self.place_cube()
+        else:
+            if 0.3 < distance_in_x:
+                epoches = 8
+            elif 0.2 < distance_in_x < 0.3:
+                epoches = 5
+            elif 0.15 < distance_in_x < 0.2:
+                epoches = 3
+            elif distance_in_x < 0.14:
+                epoches = 1
+            else:
+                epoches = 1
+            for i in range(epoches):
+                if distance_in_x <= gama_x:
+                    dx = 0
+                else:
+
+                    dx = self.distance_funtion(distance_in_x*0.3)
+                if abs(distance_in_y) <= gama_y:
+                    dy = 0
+                else:
+                    dy = self.distance_funtion(distance_in_y*4)
+
+                # print("fffffffffffffffffffffff")
+                # print(dx, dy)
+                self.my_move_function(dx=dx, dy=dy)
+                if rotate_goal > 5.5:
+                    self.move_function_z(-0.5)
+                elif rotate_goal < -5.5:
+                    self.move_function_z(0.5)
 
     def forward_to_box(self, center, distance):
         if distance > 0.45:
