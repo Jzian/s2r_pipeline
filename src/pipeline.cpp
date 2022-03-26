@@ -59,16 +59,18 @@ private:
         
         enum TargetAction
         {
+            ABORTED_nav = 4,
             ARRIVAL,
             UNARRIVAL,
 
         } targetAction{};
     };
-
+    int Aborted_targetSet = 0;
     int NUMS = 0,NUMS_last = 0;
     geometry_msgs::Twist MoveTwist;
     geometry_msgs::Pose2D Target;
     geometry_msgs::Pose2D Target3point;
+    geometry_msgs::Pose2D Point2d;
     bool TargetGetFlag{false},newGoal{true},DetectFlag{false},done{false},PutFlag{false},arrival{false};
     bool GraspFlag{false},ToPut{false},PutOnce{true},threeTransFlag{true},threePutFlag{true},GoOnce{true},GoPutOnce{true};
     ros::Publisher log_pub;
@@ -314,7 +316,7 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
     {
         currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
         dx = PoseTarget.x - currentpose.x ;
-        std::cout << "dx = : " << dx << std::endl;
+        // std::cout << "dx = : " << dx << std::endl;
         if(PoseTarget.theta < -3)
         {
             if(currentpose.x + midx < PoseTarget.x + midx) 
@@ -338,13 +340,17 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
         }
 
         dy = PoseTarget.y - currentpose.y  ; // dy>0 left
-        std::cout << "dy = : " << dy << std::endl;
+        // std::cout << "dy = : " << dy << std::endl;
         if(PoseTarget.theta < -3)
         {
-            if(currentpose.y + midy < PoseTarget.y + midy)
-                dy = speed;
-            else
+            if(currentpose.y + midy < PoseTarget.y + midy && currentpose.y > 0)
                 dy = -speed;
+            else if(currentpose.y + midy < PoseTarget.y + midy && currentpose.y < 0)
+                dy = speed;
+            else if(currentpose.y + midy > PoseTarget.y + midy && currentpose.y < 0 )
+                dy = -speed;
+            else 
+                dy = speed;
         }
         else if(PoseTarget.theta < 0)
         {
@@ -424,6 +430,8 @@ void EP_Nav::Move_cmd_Stop()
     base_move_vel_pub.publish(pose);
 }
 
+
+
 EP_Nav::Posearray EP_Nav::PoseSet()
 {
     EP_Nav::Posearray posearray{};
@@ -433,7 +441,7 @@ EP_Nav::Posearray EP_Nav::PoseSet()
     // posearray.x[3] = 2.504 ,posearray.y[3] = 2.441, posearray.th[3] = 1.599;    //num3
     posearray.x[3] = 2.0 ,posearray.y[3] = 2.68, posearray.th[3] = 0.0;    //num3
     posearray.x[4] = 2.22 ,posearray.y[4] = 0.014, posearray.th[4] = -3.13;    //num4
-    posearray.x[5] = 2.69 ,posearray.y[5] = -0.859, posearray.th[5] = 0.00;   //num5
+    posearray.x[5] = 2.69 ,posearray.y[5] = -0.868, posearray.th[5] = 0.00;   //num5
     posearray.x[6] = 0.167 ,posearray.y[6] = 1.512, posearray.th[6] = 0.00;  //detect GoalNums
     posearray.x[7] = 1.25 ,posearray.y[7] = 2.61, posearray.th[7] = 0;
     posearray.x[8] = 1.17 ,posearray.y[8] = 0.977, posearray.th[8] = 0;
@@ -499,7 +507,74 @@ bool EP_Nav::Arrivalxy(geometry_msgs::Pose2D poseIn)
 
 void EP_Nav::run()
 {
+    targetPose target_pose{};
     result = navCore->getMoveBaseActionResult();
+    if(result == target_pose.ABORTED_nav )
+    {
+        geometry_msgs::Twist pose;
+        Point2d = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);
+        if(Point2d.theta > 0 && Point2d.theta < 1.57)
+        {
+            if(Point2d.x < 1.87 && Point2d.x > 1.47 && Point2d.y < 2.42 && Point2d.y > 2.02)
+            {
+                pose.linear.x = 0;
+                pose.linear.y = 0.1;
+                pub_move_cmd.publish(pose);
+            }
+            else if(Point2d.x < 1.15 && Point2d.x > 0.75 && Point2d.y < 2.02 && Point2d.y > 1.62)
+            {
+                pose.linear.x = 0;
+                pose.linear.y = -0.1;
+                pub_move_cmd.publish(pose);                
+            }
+        }
+        if(Point2d.theta < -1.57 && Point2d.theta > -3.1)
+        {
+            if(Point2d.x < 1.87 && Point2d.x > 1.47 && Point2d.y < 2.42 && Point2d.y > 2.02)
+            {
+                pose.linear.x = 0;
+                pose.linear.y = -0.1;
+                pub_move_cmd.publish(pose);
+            }
+            else if(Point2d.x < 1.15 && Point2d.x > 0.75 && Point2d.y < 2.02 && Point2d.y > 1.62)
+            {
+                pose.linear.x = 0;
+                pose.linear.y = 0.1;
+                pub_move_cmd.publish(pose);                
+            }
+        }
+        if(Point2d.theta < 0 && Point2d.theta > -1.57)
+        {
+            if(Point2d.x < 1.9 && Point2d.x > 1.5 && Point2d.y < 1.42 && Point2d.y > 1.02)
+            {
+                pose.linear.x = 0;
+                pose.linear.y = -0.1;
+                pub_move_cmd.publish(pose);
+            }
+            else if(Point2d.x < 1.84 && Point2d.x > 1.44 && Point2d.y < 0.72 && Point2d.y > 0.32)
+            {
+                pose.linear.x = 0;
+                pose.linear.y = 0.1;
+                pub_move_cmd.publish(pose);                
+            }
+        }
+        if(Point2d.theta < 3 && Point2d.theta > 1.57)
+        {
+            if(Point2d.x < 1.9 && Point2d.x > 1.5 && Point2d.y < 1.42 && Point2d.y > 1.02)
+            {
+                pose.linear.x = 0;
+                pose.linear.y = 0.1;
+                pub_move_cmd.publish(pose);
+            }
+            else if(Point2d.x < 1.84 && Point2d.x > 1.44 && Point2d.y < 0.72 && Point2d.y > 0.32)
+            {
+                pose.linear.x = 0;
+                pose.linear.y = -0.1;
+                pub_move_cmd.publish(pose);                
+            }
+        }
+        GotoTarget(pose_targets, Aborted_targetSet);
+    }
     //if(!TagetNumArray.empty() && TargetGetFlag)
     // if(true)
     // {      
@@ -512,7 +587,6 @@ void EP_Nav::run()
             GotoTarget(pose_targets, 6);
             newGoal = false;
         }
-            
         Target = ToPose(pose_targets, 6);
         newGoal = false;
         // result = navCore->getMoveBaseActionResult();
@@ -526,6 +600,11 @@ void EP_Nav::run()
             TagetNumArray.push_back(serviceCaller->DetectTarget[2]);
             DetectFlag = true;
             newGoal = true;
+            for(int i=0; i < 3 ;i++)
+            {
+                if(TagetNumArray[i] == 6)
+                    TagetNumArray[i] -= 3;
+            }
             std::cout << "true" << TagetNumArray[2] << std::endl;
         }               
         else
@@ -556,6 +635,7 @@ void EP_Nav::run()
             if(threeTransFlag)
             {
                 GotoTarget(pose_targets, TagetNumArray[NUMS]);
+                Aborted_targetSet = TagetNumArray[NUMS];
                 newGoal = false;
                 
                 std::cout << "nums: " << NUMS << "; targetnum: "<< TagetNumArray[NUMS] << std::endl;
@@ -604,6 +684,7 @@ void EP_Nav::run()
             {
     
                 GotoTarget(pose_targets,0);
+                Aborted_targetSet = 0;
                 ToPut = false;
                 std::cout << "gotozero" << std::endl;
             }
@@ -644,7 +725,7 @@ void EP_Nav::run()
 
 int main(int argc, char** argv)
 {
-    sleep(3);
+    sleep(6);
     ros::init(argc , argv, "sim2real_client");
     ros::NodeHandle nh_;
     ros::Rate loop_rate(30);
