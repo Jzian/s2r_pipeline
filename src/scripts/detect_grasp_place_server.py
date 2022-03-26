@@ -45,8 +45,8 @@ class detect_grasp_place_server():
             else:
                 print(self.target_numbers)
                 self.toServer.grasp_place.move_right_by_distance(0.2)
-                return TargetNumberResponse(True, 2, 1, 4)
-                # return TargetNumberResponse(True, self.target_numbers[0], self.target_numbers[1], self.target_numbers[2])
+                # return TargetNumberResponse(True, 2, 1, 4)
+                return TargetNumberResponse(True, self.target_numbers[0], self.target_numbers[1], self.target_numbers[2])
         elif req.work_case == 7 and req.number == self.toServer.case2_number_class():
             # elif req.work_case == 2:
             self.grasp_flag = False
