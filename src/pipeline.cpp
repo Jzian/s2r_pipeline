@@ -345,9 +345,9 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
         {
             if(currentpose.y + midy < PoseTarget.y + midy && currentpose.y > 0)
                 dy = -speed;
-            else if(currentpose.y + midy < PoseTarget.y + midy && currentpose.y < 0)
+            else if(currentpose.y + midy < PoseTarget.y + midy && currentpose.y < 0.2)
                 dy = speed;
-            else if(currentpose.y + midy > PoseTarget.y + midy && currentpose.y < 0 )
+            else if(currentpose.y + midy > PoseTarget.y + midy && currentpose.y < 0.2 )
                 dy = -speed;
             else 
                 dy = speed;
@@ -441,7 +441,7 @@ EP_Nav::Posearray EP_Nav::PoseSet()
     // posearray.x[3] = 2.504 ,posearray.y[3] = 2.441, posearray.th[3] = 1.599;    //num3
     posearray.x[3] = 2.0 ,posearray.y[3] = 2.68, posearray.th[3] = 0.0;    //num3
     posearray.x[4] = 2.22 ,posearray.y[4] = 0.014, posearray.th[4] = -3.13;    //num4
-    posearray.x[5] = 2.69 ,posearray.y[5] = -0.868, posearray.th[5] = 0.00;   //num5
+    posearray.x[5] = 2.68 ,posearray.y[5] = -0.795, posearray.th[5] = -0.15;   //num5
     posearray.x[6] = 0.167 ,posearray.y[6] = 1.512, posearray.th[6] = 0.00;  //detect GoalNums
     posearray.x[7] = 1.25 ,posearray.y[7] = 2.61, posearray.th[7] = 0;
     posearray.x[8] = 1.17 ,posearray.y[8] = 0.977, posearray.th[8] = 0;

@@ -170,11 +170,11 @@ class detect_grasp_place_server():
         self.toServer.grasp_place.set_arm()
         while not self.grasp_flag:
             try:
-                if self.toServer.case3_box_class_pose('number2')[0][0] == 2:
-                    self.target_number_pose = self.toServer.case3_box_class_pose('number2')[
-                        1][0]
-                else:
-                    self.target_number_pose = self.toServer.case2_number_pose()
+                # if self.toServer.case3_box_class_pose('number2')[0][0] == 2:
+                #     self.target_number_pose = self.toServer.case3_box_class_pose('number2')[
+                #         1][0]
+                # else:
+                self.target_number_pose = self.toServer.case2_number_pose()
                 pose = self.target_number_pose
                 self.toServer.grasp_place.pose_msg = self.toServer.grasp_place.point2msg(
                     pose)
@@ -188,7 +188,7 @@ class detect_grasp_place_server():
                     center, distance, self.toServer.grasp_place.pose_msg.orientation)
             except Exception as e:
                 print('the img is wrong')
-                self.toServer.grasp_place.move_forward_by_distance(-1.5)
+                self.toServer.grasp_place.move_forward_by_distance(-0.2)
                 rospy.sleep(0.5)
                 if self.toServer.case2_number_pose()[:, 0, :].shape[0] != 4 and self.judge_state_distance > 0.20 and self.toServer.case2_number_class() != 2:
                     self.toServer.grasp_place.move_forward_by_distance(0.1)
