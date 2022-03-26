@@ -388,11 +388,11 @@ class grasp_cube_kevin():
         self.move_arm()
         rospy.sleep(1)
         self.close_gripper()
-        rospy.sleep(1)
+        rospy.sleep(0.5)
         self.reset_arm()
-        rospy.sleep(1)
-        self.forward_zero()
-        rospy.sleep(1)
+        # rospy.sleep(1)
+        # self.forward_zero()
+        # rospy.sleep(1)
         self.move_forward_by_distance(-0.3)
         self.grasp_success = True
 

@@ -380,7 +380,7 @@ class placeAruco:
 
         _, rotate_goal, _ = self.q2e(rvec)
 
-        goal = [0.0305, 0.0, 0.2]
+        goal = [0.0304, 0.0, 0.2]
         distance_in_x = tvec[2] - goal[2]
         distance_in_y = tvec[0] - goal[0]
         # print("distance in x", distance_in_x)

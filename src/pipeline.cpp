@@ -218,7 +218,7 @@ bool EP_Nav::ArrivalGoal(geometry_msgs::Pose2D PoseTarget)
     dy = std::abs(currentpose.y - PoseTarget.y);
     dth = currentpose.theta - PoseTarget.theta;
     //std::cout << "isarrival?" << std::endl;
-    if(dx < 0.25 && dy < 0.25)
+    if(dx < 0.3 && dy < 0.3)
     {
         arrival = true;
     }
@@ -269,7 +269,7 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
     double dx,dy,dth,Cth,Tth ,turn,midx,midy,speed;
     midx = 0.336;
     midy = 1.2; 
-    speed = 0.35;      
+    speed = 0.45;      
     currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);                
     dth = currentpose.theta - PoseTarget.theta;
     Cth = currentpose.theta;
@@ -312,36 +312,55 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
     currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
     dx = PoseTarget.x - currentpose.x  ;
     dy = PoseTarget.y - currentpose.y  ; // dy>0 left
+    std::cout << PoseTarget.theta  << std::endl;
+    std::cout << "move xxxxx " << dx << std::endl;
+    std::cout << "move yyyyy " << dy << std::endl;
     while(abs(dx) > 0.01 && abs(dy) > 0.01)
     {
+        std::cout << "fkkkkk "  << std::endl;
         currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
         dx = PoseTarget.x - currentpose.x ;
+        std::cout <<"th ttttttttt" << PoseTarget.theta  << std::endl;
+        std::cout << "move cccxxxxx " << currentpose.x << std::endl;
+        std::cout << "move ccccyyyyy " << currentpose.y << std::endl;
         // std::cout << "dx = : " << dx << std::endl;
-        if(PoseTarget.theta < -3)
+        if(PoseTarget.theta > -1.0 && PoseTarget.theta < 1.2)
+        {
+            std::cout << "moveinnnn xxxxx " << dx << std::endl;
+            std::cout << "target x " << PoseTarget.x << std::endl;
+            std::cout << "target x " << PoseTarget.y << std::endl;
+            if(currentpose.x + midx < PoseTarget.x + midx)
+                dx = speed;
+            else 
+                dx = -speed;
+        }
+        else if(PoseTarget.theta < -2.7 || PoseTarget.theta > 2.7)
         {
             if(currentpose.x + midx < PoseTarget.x + midx) 
                 dx = -speed;
             else
                 dx = speed;
         }
-        else if(PoseTarget.theta < 0)
+        else if(PoseTarget.theta < -1.3  )
         {
             if(currentpose.y + midy < PoseTarget.y + midy)
                 dx = -speed;
             else 
                 dx = speed;
         }
-        else
-        {
-            if(currentpose.x + midx < PoseTarget.x + midx)
-                dx = speed;
-            else 
-                dx = -speed;
-        }
+
 
         dy = PoseTarget.y - currentpose.y  ; // dy>0 left
         // std::cout << "dy = : " << dy << std::endl;
-        if(PoseTarget.theta < -3)
+        if(PoseTarget.theta > -1.0 && PoseTarget.theta < 1.2)
+        {
+            std::cout << "move yyyyy " << dx << std::endl;
+            if(currentpose.y + midy < PoseTarget.y + midy)
+                dy = speed;
+            else
+                dy = -speed;
+        }
+        else if(PoseTarget.theta < -3)
         {
             if(currentpose.y + midy < PoseTarget.y + midy && currentpose.y > 0)
                 dy = -speed;
@@ -352,16 +371,9 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
             else 
                 dy = speed;
         }
-        else if(PoseTarget.theta < 0)
+        else if(PoseTarget.theta < -1.5)
         {
             if(currentpose.x + midx < PoseTarget.x + midx)
-                dy = speed;
-            else
-                dy = -speed;
-        }
-        else
-        {
-            if(currentpose.y + midy < PoseTarget.y + midy)
                 dy = speed;
             else
                 dy = -speed;
@@ -377,7 +389,233 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
         dx = PoseTarget.x - currentpose.x ;   
         dy = PoseTarget.y - currentpose.y ;  
     }
-    Move_cmd_Stop();
+    Move_cmd_Stop();   
+    // if(abs(dy) < 0.01 && abs(dx) < 0.01)
+    // {
+    //     while(abs(dx) > 0.01 && abs(dy) > 0.01)
+    //     {
+    //         std::cout << "fkkkkk "  << std::endl;
+    //         currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
+    //         dx = PoseTarget.x - currentpose.x ;
+    //         std::cout <<"th ttttttttt" << PoseTarget.theta  << std::endl;
+    //         std::cout << "move cccxxxxx " << currentpose.x << std::endl;
+    //         std::cout << "move ccccyyyyy " << currentpose.y << std::endl;
+    //         // std::cout << "dx = : " << dx << std::endl;
+    //         if(PoseTarget.theta > -1.0 && PoseTarget.theta < 1.2)
+    //         {
+    //             std::cout << "moveinnnn xxxxx " << dx << std::endl;
+    //             std::cout << "target x " << PoseTarget.x << std::endl;
+    //             std::cout << "target x " << PoseTarget.y << std::endl;
+    //             if(currentpose.x + midx < PoseTarget.x + midx)
+    //                 dx = speed;
+    //             else 
+    //                 dx = -speed;
+    //         }
+    //         else if(PoseTarget.theta < -2.7 || PoseTarget.theta > 2.7)
+    //         {
+    //             if(currentpose.x + midx < PoseTarget.x + midx) 
+    //                 dx = -speed;
+    //             else
+    //                 dx = speed;
+    //         }
+    //         else if(PoseTarget.theta < -1.3  )
+    //         {
+    //             if(currentpose.y + midy < PoseTarget.y + midy)
+    //                 dx = -speed;
+    //             else 
+    //                 dx = speed;
+    //         }
+    
+
+    //         dy = PoseTarget.y - currentpose.y  ; // dy>0 left
+    //         // std::cout << "dy = : " << dy << std::endl;
+    //         if(PoseTarget.theta > -1.0 && PoseTarget.theta < 1.2)
+    //         {
+    //             std::cout << "move yyyyy " << dx << std::endl;
+    //             if(currentpose.y + midy < PoseTarget.y + midy)
+    //                 dy = speed;
+    //             else
+    //                 dy = -speed;
+    //         }
+    //         else if(PoseTarget.theta < -3)
+    //         {
+    //             if(currentpose.y + midy < PoseTarget.y + midy && currentpose.y > 0)
+    //                 dy = -speed;
+    //             else if(currentpose.y + midy < PoseTarget.y + midy && currentpose.y < 0.2)
+    //                 dy = speed;
+    //             else if(currentpose.y + midy > PoseTarget.y + midy && currentpose.y < 0.2 )
+    //                 dy = -speed;
+    //             else 
+    //                 dy = speed;
+    //         }
+    //         else if(PoseTarget.theta < -1.5)
+    //         {
+    //             if(currentpose.x + midx < PoseTarget.x + midx)
+    //                 dy = speed;
+    //             else
+    //                 dy = -speed;
+    //         }
+    //         pose.linear.x = dx;
+    //         pose.linear.y = dy;
+    //         pose.linear.z = 0;
+    //         pose.angular.x = 0;
+    //         pose.angular.y = 0;
+    //         pose.angular.z = 0;
+    //         base_move_vel_pub.publish(pose);     
+    //         currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
+    //         dx = PoseTarget.x - currentpose.x ;   
+    //         dy = PoseTarget.y - currentpose.y ;  
+    //     }
+    //     Move_cmd_Stop();
+    // }
+    // else if(abs(dy) < 0.01)
+    // {
+    //     while(abs(dx) > 0.01)
+    //     {
+         
+    //         currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
+    //         dx = PoseTarget.x - currentpose.x ;
+
+    //         // std::cout << "dx = : " << dx << std::endl;
+    //         if(PoseTarget.theta > -1.0 && PoseTarget.theta < 1.2)
+    //         {
+  
+    //             if(currentpose.x + midx < PoseTarget.x + midx)
+    //                 dx = speed;
+    //             else 
+    //                 dx = -speed;
+    //         }
+    //         else if(PoseTarget.theta < -2.7 || PoseTarget.theta > 2.7)
+    //         {
+    //             if(currentpose.x + midx < PoseTarget.x + midx) 
+    //                 dx = -speed;
+    //             else
+    //                 dx = speed;
+    //         }
+    //         else if(PoseTarget.theta < -1.3  )
+    //         {
+    //             if(currentpose.y + midy < PoseTarget.y + midy)
+    //                 dx = -speed;
+    //             else 
+    //                 dx = speed;
+    //         }
+    
+
+    //         dy = PoseTarget.y - currentpose.y  ; // dy>0 left
+    //         // std::cout << "dy = : " << dy << std::endl;
+    //         if(PoseTarget.theta > -1.0 && PoseTarget.theta < 1.2)
+    //         {
+               
+    //             if(currentpose.y + midy < PoseTarget.y + midy)
+    //                 dy = speed;
+    //             else
+    //                 dy = -speed;
+    //         }
+    //         else if(PoseTarget.theta < -3)
+    //         {
+    //             if(currentpose.y + midy < PoseTarget.y + midy && currentpose.y > 0)
+    //                 dy = -speed;
+    //             else if(currentpose.y + midy < PoseTarget.y + midy && currentpose.y < 0.2)
+    //                 dy = speed;
+    //             else if(currentpose.y + midy > PoseTarget.y + midy && currentpose.y < 0.2 )
+    //                 dy = -speed;
+    //             else 
+    //                 dy = speed;
+    //         }
+    //         else if(PoseTarget.theta < -1.5)
+    //         {
+    //             if(currentpose.x + midx < PoseTarget.x + midx)
+    //                 dy = speed;
+    //             else
+    //                 dy = -speed;
+    //         }
+    //         pose.linear.x = dx;
+    //         pose.linear.y = dy;
+    //         pose.linear.z = 0;
+    //         pose.angular.x = 0;
+    //         pose.angular.y = 0;
+    //         pose.angular.z = 0;
+    //         base_move_vel_pub.publish(pose);     
+    //         currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
+    //         dx = PoseTarget.x - currentpose.x ;   
+    //         dy = PoseTarget.y - currentpose.y ;  
+    //     }
+    //     Move_cmd_Stop();
+    // }
+    // else if(abs(dx) < 0.01)
+    // {
+    //     while(abs(dy) > 0.01)
+    //     {
+        
+    //         currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
+    //         dx = PoseTarget.x - currentpose.x ;
+
+    //         // std::cout << "dx = : " << dx << std::endl;
+    //         if(PoseTarget.theta > -1.0 && PoseTarget.theta < 1.2)
+    //         {
+
+    //             if(currentpose.x + midx < PoseTarget.x + midx)
+    //                 dx = speed;
+    //             else 
+    //                 dx = -speed;
+    //         }
+    //         else if(PoseTarget.theta < -2.7 || PoseTarget.theta > 2.7)
+    //         {
+    //             if(currentpose.x + midx < PoseTarget.x + midx) 
+    //                 dx = -speed;
+    //             else
+    //                 dx = speed;
+    //         }
+    //         else if(PoseTarget.theta < -1.3  )
+    //         {
+    //             if(currentpose.y + midy < PoseTarget.y + midy)
+    //                 dx = -speed;
+    //             else 
+    //                 dx = speed;
+    //         }
+    
+
+    //         dy = PoseTarget.y - currentpose.y  ; // dy>0 left
+    //         // std::cout << "dy = : " << dy << std::endl;
+    //         if(PoseTarget.theta > -1.0 && PoseTarget.theta < 1.2)
+    //         {
+    //             std::cout << "move yyyyy " << dx << std::endl;
+    //             if(currentpose.y + midy < PoseTarget.y + midy)
+    //                 dy = speed;
+    //             else
+    //                 dy = -speed;
+    //         }
+    //         else if(PoseTarget.theta < -3)
+    //         {
+    //             if(currentpose.y + midy < PoseTarget.y + midy && currentpose.y > 0)
+    //                 dy = -speed;
+    //             else if(currentpose.y + midy < PoseTarget.y + midy && currentpose.y < 0.2)
+    //                 dy = speed;
+    //             else if(currentpose.y + midy > PoseTarget.y + midy && currentpose.y < 0.2 )
+    //                 dy = -speed;
+    //             else 
+    //                 dy = speed;
+    //         }
+    //         else if(PoseTarget.theta < -1.5)
+    //         {
+    //             if(currentpose.x + midx < PoseTarget.x + midx)
+    //                 dy = speed;
+    //             else
+    //                 dy = -speed;
+    //         }
+    //         pose.linear.x = dx;
+    //         pose.linear.y = dy;
+    //         pose.linear.z = 0;
+    //         pose.angular.x = 0;
+    //         pose.angular.y = 0;
+    //         pose.angular.z = 0;
+    //         base_move_vel_pub.publish(pose);     
+    //         currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
+    //         dx = PoseTarget.x - currentpose.x ;   
+    //         dy = PoseTarget.y - currentpose.y ;  
+    //     }
+    //     Move_cmd_Stop();
+    // }  
     // while(abs(dy) > 0.09)
     // {
     //     currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
@@ -440,13 +678,14 @@ EP_Nav::Posearray EP_Nav::PoseSet()
     posearray.x[2] = 0.384 ,posearray.y[2] = 2.9, posearray.th[2] = -1.57;    //num2
     // posearray.x[3] = 2.504 ,posearray.y[3] = 2.441, posearray.th[3] = 1.599;    //num3
     posearray.x[3] = 2.0 ,posearray.y[3] = 2.68, posearray.th[3] = 0.0;    //num3
-    posearray.x[4] = 2.22 ,posearray.y[4] = 0.014, posearray.th[4] = -3.13;    //num4
+    // posearray.x[4] = 2.22 ,posearray.y[4] = 0.014, posearray.th[4] = -3.13;    //num4
+    posearray.x[4] = 2.21 ,posearray.y[4] = 0.33, posearray.th[4] = -3.13;    //num4
     // posearray.x[5] = 2.6 ,posearray.y[5] = -0.864, posearray.th[5] = 0;   //num5
-    posearray.x[5] = 2.54 ,posearray.y[5] = -0.768, posearray.th[5] = 0;   //num5
+    posearray.x[5] = 2.6 ,posearray.y[5] = -0.813, posearray.th[5] = 0.001;   //num5
      
     posearray.x[6] = 0.167 ,posearray.y[6] = 1.512, posearray.th[6] = 0.00;  //detect GoalNums
-    posearray.x[7] = 1.25 ,posearray.y[7] = 2.61, posearray.th[7] = 0;
-    posearray.x[8] = 1.17 ,posearray.y[8] = 0.977, posearray.th[8] = 0;
+    posearray.x[7] = 1.25 ,posearray.y[7] = 2.61, posearray.th[7] = 0.0;
+    posearray.x[8] = 1.17 ,posearray.y[8] = 0.977, posearray.th[8] = 0.0;
      
     return posearray;
 }
