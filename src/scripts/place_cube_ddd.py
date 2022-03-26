@@ -411,26 +411,36 @@ class placeAruco:
             self.place_success = True
 
         else:
-            if distance_in_x <= gama_x:
-                dx = 0
+            if 0.5 < distance_in_x < 0.8:
+                epoches = 7
+            elif 0.24 < distance_in_x < 0.5:
+                epoches = 4
+            elif 0.13 < distance_in_x < 0.24:
+                epoches = 2
+            elif distance_in_x < 0.13:
+                epoches = 1
             else:
-                dx = self.distance_funtion(distance_in_x*0.7)
-            if abs(distance_in_y) <= gama_y:
-                dy = 0
-            else:
-                dy = self.distance_funtion(distance_in_y*4)
-            self.my_move_function(dx=dx, dy=dy)
-            # if abs(distance_in_y) <= gama_y and distance_in_y < 0:
-            #     self.move_function_xy(0, 1)
-            # elif abs(distance_in_y) <= gama_y and distance_in_y > 0:
-            #     self.move_function_xy(0, -1)
-            # print("rotate_goal", rotate_goal)
-            if rotate_goal > 1.3:
-                self.move_function_z(-0.5)
-                pass
-            elif rotate_goal < -1.3:
-                self.move_function_z(0.5)
-                pass
+                epoches = 1
+            for i in range(epoches):
+                if distance_in_x <= gama_x:
+                    dx = 0
+                else:
+                    dx = self.distance_funtion(distance_in_x*0.7)
+                if abs(distance_in_y) <= gama_y:
+                    dy = 0
+                else:
+                    dy = self.distance_funtion(distance_in_y*4)
+                self.my_move_function(dx=dx, dy=dy)
+                # if abs(distance_in_y) <= gama_y and distance_in_y < 0:
+                #     self.move_function_xy(0, 1)
+                # elif abs(distance_in_y) <= gama_y and distance_in_y > 0:
+                #     self.move_function_xy(0, -1)
+                # print("rotate_goal", rotate_goal)
+                if rotate_goal > 1.3:
+                    self.move_function_z(-0.45)
+                    pass
+                elif rotate_goal < -1.3:
+                    self.move_function_z(0.45)
 
 
 def main():
@@ -448,7 +458,6 @@ def main():
     except KeyboardInterrupt:
         print("Shutting down")
         ap.forward_zero()
-
 
         # ap.reset_arm()
 if __name__ == '__main__':
