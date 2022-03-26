@@ -95,7 +95,7 @@ public:
     };
     
     struct Posearray{
-        double x[8] , y[8] , th[8] ;
+        double x[9] , y[9] , th[9] ;
     }posearray{};
     std::string MAP_FRAME , BASE_FOOT_PRINT;
     Posearray pose_targets{};
@@ -342,9 +342,9 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
         if(PoseTarget.theta < -3)
         {
             if(currentpose.y + midy < PoseTarget.y + midy)
-                dy = -speed;
-            else
                 dy = speed;
+            else
+                dy = -speed;
         }
         else if(PoseTarget.theta < 0)
         {
@@ -436,6 +436,8 @@ EP_Nav::Posearray EP_Nav::PoseSet()
     posearray.x[5] = 2.69 ,posearray.y[5] = -0.859, posearray.th[5] = 0.00;   //num5
     posearray.x[6] = 0.167 ,posearray.y[6] = 1.512, posearray.th[6] = 0.00;  //detect GoalNums
     posearray.x[7] = 1.25 ,posearray.y[7] = 2.61, posearray.th[7] = 0;
+    posearray.x[8] = 1.17 ,posearray.y[8] = 0.977, posearray.th[8] = 0;
+     
     return posearray;
 }
 
@@ -497,6 +499,7 @@ bool EP_Nav::Arrivalxy(geometry_msgs::Pose2D poseIn)
 
 void EP_Nav::run()
 {
+    result = navCore->getMoveBaseActionResult();
     //if(!TagetNumArray.empty() && TargetGetFlag)
     // if(true)
     // {      
@@ -535,20 +538,21 @@ void EP_Nav::run()
     {
         if(newGoal)
         {
-            if(TagetNumArray[NUMS] == 3 && GoOnce)
-            {
-                GoOnce = false;
-                threeTransFlag = false;
-                GotoTarget(pose_targets, 7);
-                Target3point = ToPose(pose_targets, 7); 
-            }
-            if (!GoOnce)
-            {
-                if(Arrivalxy(Target3point))
-                {
-                    threeTransFlag = true;                    
-                }
-            }            
+            // if(TagetNumArray[NUMS] == 3 || TagetNumArray[NUMS] == 1 || TagetNumArray[NUMS] == 2 && GoOnce)
+            // {
+            //     GoOnce = false;
+            //     threeTransFlag = false;
+            //     GotoTarget(pose_targets, 7);
+            //     Target3point = ToPose(pose_targets, 7); 
+            // }
+            // if (!GoOnce)
+            // {
+            //     if(Arrivalxy(Target3point))
+            //     {
+            //         threeTransFlag = true;                    
+            //     }
+            // }
+            threeTransFlag = true;             
             if(threeTransFlag)
             {
                 GotoTarget(pose_targets, TagetNumArray[NUMS]);
@@ -577,24 +581,25 @@ void EP_Nav::run()
         }          
         if(PutFlag)
         {
-            if(TagetNumArray[NUMS] == 3 && GoPutOnce)
-            {
-                std::cout<<"put3back"<<std::endl;
-                GoPutOnce = false;
-                threePutFlag = false;
-                GotoTarget(pose_targets, 7);
-                Target3point = ToPose(pose_targets, 7 ); 
-            }
-            if (!GoPutOnce)
-            {
-                std::cout<<"judge 3 put back"<<std::endl;
-                if(Arrivalxy(Target3point))
-                {
-                    std::cout<<"arrive 3 back"<<std::endl;
-                    threePutFlag = true;                    
-                }
-            }   
+            // if((TagetNumArray[NUMS] == 3 || TagetNumArray[NUMS] == 1 || TagetNumArray[NUMS] == 2) && GoPutOnce)
+            // {
+            //     std::cout<<"put3back"<<std::endl;
+            //     GoPutOnce = false;
+            //     threePutFlag = false;
+            //     GotoTarget(pose_targets, 7);
+            //     Target3point = ToPose(pose_targets, 7 ); 
+            // }
+            // if (!GoPutOnce)
+            // {
+            //     std::cout<<"judge 3 put back"<<std::endl;
+            //     if(Arrivalxy(Target3point))
+            //     {
+            //         std::cout<<"arrive 3 back"<<std::endl;
+            //         threePutFlag = true;                    
+            //     }
+            // }   
             //navCore->cancelAllGoals();
+            threePutFlag = true; 
             if (ToPut && threePutFlag)
             {
     
@@ -614,6 +619,7 @@ void EP_Nav::run()
 
                 if(serviceCaller->PutDone)
                 {
+                    serviceCaller->PutDone = false;
                     std::cout << "putdone:next goal"  << std::endl;
                     PutFlag = false;
                     newGoal = true;
