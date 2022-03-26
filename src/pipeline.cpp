@@ -551,7 +551,7 @@ void EP_Nav::run()
                 pose.linear.y = -0.1;
                 pub_move_cmd.publish(pose);
             }
-            else if(Point2d.x < 1.84 && Point2d.x > 1.44 && Point2d.y < 0.72 && Point2d.y > 0.32)
+            else if(Point2d.x < 1.84 && Point2d.x > 1.44 && Point2d.y < 0.90 && Point2d.y > 0.12)
             {
                 pose.linear.x = 0;
                 pose.linear.y = 0.1;
@@ -586,6 +586,7 @@ void EP_Nav::run()
         {
             GotoTarget(pose_targets, 6);
             newGoal = false;
+            PutOnce = true;
         }
         Target = ToPose(pose_targets, 6);
         newGoal = false;
