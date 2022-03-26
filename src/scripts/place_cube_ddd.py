@@ -365,7 +365,7 @@ class placeAruco:
             return
 
         gama_x = 0.003
-        gama_y = 0.003
+        gama_y = 0.008
 
         tvec = [0, 0, 0]
         tvec[0] = data.position.x
