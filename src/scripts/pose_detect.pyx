@@ -142,6 +142,7 @@ def pose_detection(np.ndarray[DTYPE_t, ndim=3] frame,np.ndarray[DTYPE_t, ndim=1]
                 quads_f.append(approx_sort.astype(float))
     rvec_list = []
     tvec_list = []
+    area_list = []
     for i in range(len(quads_f)):
         model_image = np.array([(quads_f[i][0,0,0],quads_f[i][0,0,1]),
                                 (quads_f[i][1,0,0],quads_f[i][1,0,1]),
@@ -162,6 +163,7 @@ def pose_detection(np.ndarray[DTYPE_t, ndim=3] frame,np.ndarray[DTYPE_t, ndim=1]
             quads_prj.append(projectedPoints.astype(int))
             rvec_list.append(rvec)
             tvec_list.append(tvec)
+            area_list.append(area)
 
     quads_prj_draw = []
     quads_ID = []
@@ -219,4 +221,4 @@ def pose_detection(np.ndarray[DTYPE_t, ndim=3] frame,np.ndarray[DTYPE_t, ndim=1]
 
     cv2.drawContours(frame,quads_prj_draw,-1,(0,255,0),3)
 
-    return quads_ID,tvec_list,rvec_list
+    return quads_ID,tvec_list,rvec_list,quads

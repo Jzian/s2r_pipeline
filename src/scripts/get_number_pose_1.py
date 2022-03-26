@@ -67,7 +67,7 @@ def get_box_pose_ddd(number):
 
     id_list = []
     # id_list,tvec_list,rvec_list= marker_detection(cv_image,seg_papram)
-    id_list, tvec_list, rvec_list = pose_detection(cv_image, seg_papram)
+    id_list, tvec_list, rvec_list, _ = pose_detection(cv_image, seg_papram)
 
     # cv2.imshow('frame', cv_image)
     # cv2.waitKey(1)
