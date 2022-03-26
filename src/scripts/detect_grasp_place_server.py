@@ -45,7 +45,8 @@ class detect_grasp_place_server():
             else:
                 print(self.target_numbers)
                 self.toServer.grasp_place.move_right_by_distance(0.2)
-                return TargetNumberResponse(True, self.target_numbers[0], self.target_numbers[1], self.target_numbers[2])
+                return TargetNumberResponse(True, 2, 1, 4)
+                # return TargetNumberResponse(True, self.target_numbers[0], self.target_numbers[1], self.target_numbers[2])
         elif req.work_case == 7 and req.number == self.toServer.case2_number_class():
             # elif req.work_case == 2:
             self.grasp_flag = False
@@ -189,13 +190,9 @@ class detect_grasp_place_server():
             return ROI[y1:y2, x1:x2]
         area_size_max = 0  # 面积最大区域中间量
         area_size_list = []  # 所有区域的面积列表
-        point_list = point_list.tolist()
-        print(point_list)
-        for cnt in point_list[:, 0, :]:
-            print(cnt)
+        for cnt in point_list:
             current_area_size = cv2.contourArea(cnt)
-            if current_area_size > 200:
-                area_size_list.append(current_area_size)
+            area_size_list.append(current_area_size)
             if current_area_size > area_size_max:
                 area_size_max = current_area_size
         # if number == 3:
@@ -218,7 +215,7 @@ class detect_grasp_place_server():
         except CvBridgeError as err:
             print(err)
         for i, num in enumerate(top_index):
-            if area_size_list[num] > 200:
+            if area_size_list[num] > 400:
                 roi_temp = extract_roi(
                     cv_image.copy(), point_list[num].squeeze())
                 # cv2.imwrite('./output/07 抠图.png', roi_temp)
@@ -260,10 +257,15 @@ class detect_grasp_place_server():
                 # pose = self.target_number_pose
                 # self.toServer.grasp_place.pose_msg = self.toServer.grasp_place.point2msg(
                 #     pose)
-                rospy.sleep(1)
-                point_list = get_number_pose_ddd()
-                print('point_list', point_list)
-                print('kevin_point', self.point_list_max_top(point_list))
+                if number == 2:
+                    point_list = get_number_pose_ddd()
+                    self.target_number_pose = self.point_list_max_top(point_list)[
+                        1]
+                    pose = self.target_number_pose
+                else:
+                    pose = self.target_number_pose
+                self.toServer.grasp_place.pose_msg = self.toServer.grasp_place.point2msg(
+                    pose)
                 center = self.toServer.grasp_place.pose_msg.position.x
                 distance = self.toServer.grasp_place.pose_msg.position.z
                 self.judge_state_distance = distance
