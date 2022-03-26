@@ -67,7 +67,7 @@ class detect_grasp_place_server():
                 self.start_place()
             except Exception:
                 print('zhou postion is not right')
-                self.toServer.grasp_place.move_function_xy(-0.1, 0)
+                self.toServer.grasp_place.move_function_xy(-0.5, 0, 0.5)
                 self.prepare_place_debug()
                 self.start_place()
             if self.place_flag:
@@ -137,8 +137,8 @@ class detect_grasp_place_server():
         print("=====reset arm at beginning=====")
         print("=====open gripper at beginning=====")
 
-        self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
-            'box')
+        # self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
+        #     'box')
         # while(len(self.target_numbers) <= 2):
         #     print('correct_by_kevin')
         #     self.toServer.grasp_place.move_function_z(0.2)
@@ -146,16 +146,16 @@ class detect_grasp_place_server():
         #     self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
         #         'box')
 
-        self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
-            'box')
+        # self.target_numbers, self.target_numbers_pose = self.toServer.case3_box_class_pose(
+        # 'box')
         # if len(self.target_numbers)<=2:
         #     self.toServer.grasp_place.move_left_by_distance(0.11)
         #     rospy.sleep(1.5)
 
-        while(self.toServer.case3_box_pose_ddd
-              (number_of_box).position.z > 0.6):
-            print('correct_by_ddd')
-            self.toServer.grasp_place.move_function_xy_ddd(3, 0)
+        # while(self.toServer.case3_box_pose_ddd
+        #       (number_of_box).position.z > 0.6):
+        #     print('correct_by_ddd')
+        #     self.toServer.grasp_place.move_function_xy_ddd(3, 0)
 
         while not self.place_flag:
             self.toServer.pose_msg = self.toServer.case3_box_pose_ddd(
