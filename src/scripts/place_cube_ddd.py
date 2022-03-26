@@ -196,6 +196,26 @@ class placeAruco:
         vel_cmd.angular.z = 0.0
         self.base_move_vel_pub.publish(vel_cmd)
 
+    def move_function_xy(self, x, y):
+        vel_cmd = Twist()
+        vel_cmd.linear.x = x * self.base_vel
+        vel_cmd.linear.y = y * self.base_vel
+        vel_cmd.linear.z = 0.0
+        vel_cmd.angular.x = 0.0
+        vel_cmd.angular.y = 0.0
+        vel_cmd.angular.z = 0.0
+        self.base_move_vel_pub.publish(vel_cmd)
+
+        rospy.sleep(0.01)
+        # motor STOP
+        vel_cmd.linear.x = 0.0
+        vel_cmd.linear.y = 0.0
+        vel_cmd.linear.z = 0.0
+        vel_cmd.angular.x = 0.0
+        vel_cmd.angular.y = 0.0
+        vel_cmd.angular.z = 0.0
+        self.base_move_vel_pub.publish(vel_cmd)
+
     def move_base_velocity_x(self, b_vector=0.5, duration=10):
         # b_vector : x_bandwidth
         # duration : multiple of execution_cycle
@@ -274,7 +294,7 @@ class placeAruco:
 
 # ---- The code below is written by myself
     def distance_funtion(self, distance):
-        d = distance*10
+        d = distance*1
         if (d > 0) and (d < 1):
             d = 1
         if (d < 0) and (d > -1):
@@ -344,8 +364,8 @@ class placeAruco:
         if self.place_success == True:
             return
 
-        gama_x = 0.01
-        gama_y = 0.01
+        gama_x = 0.003
+        gama_y = 0.003
 
         tvec = [0, 0, 0]
         tvec[0] = data.position.x
@@ -360,13 +380,13 @@ class placeAruco:
 
         _, rotate_goal, _ = self.q2e(rvec)
 
-        goal = [0.037, 0.0, 0.2]
+        goal = [0.0337, 0.0, 0.2]
         distance_in_x = tvec[2] - goal[2]
         distance_in_y = tvec[0] - goal[0]
-        # print("distance in x", distance_in_x)
-        # print("distance in y", distance_in_y)
+        print("distance in x", distance_in_x)
+        print("distance in y", distance_in_y)
 
-        if (distance_in_x <= gama_x) and (distance_in_y <= gama_y) and (abs(rotate_goal) < 2):
+        if (distance_in_x <= gama_x) and (abs(distance_in_y) <= gama_y) and (abs(rotate_goal) < 1.3):
             # step forward
             self.move_base_velocity_x(b_vector=0.2, duration=16)
 
@@ -393,20 +413,23 @@ class placeAruco:
             if distance_in_x <= gama_x:
                 dx = 0
             else:
-                dx = self.distance_funtion(distance_in_x)
-
+                dx = self.distance_funtion(distance_in_x*0.7)
             if abs(distance_in_y) <= gama_y:
                 dy = 0
             else:
-                dy = self.distance_funtion(distance_in_y)
-
+                dy = self.distance_funtion(distance_in_y*4)
             self.my_move_function(dx=dx, dy=dy)
-
+            # if abs(distance_in_y) <= gama_y and distance_in_y < 0:
+            #     self.move_function_xy(0, 1)
+            # elif abs(distance_in_y) <= gama_y and distance_in_y > 0:
+            #     self.move_function_xy(0, -1)
             print("rotate_goal", rotate_goal)
-            if rotate_goal > 2:
-                self.move_function_z(-0.2)
-            elif rotate_goal < -2:
-                self.move_function_z(0.2)
+            if rotate_goal > 1.3:
+                self.move_function_z(-0.5)
+                pass
+            elif rotate_goal < -1.3:
+                self.move_function_z(0.5)
+                pass
 
 
 def main():
@@ -424,6 +447,7 @@ def main():
     except KeyboardInterrupt:
         print("Shutting down")
         ap.forward_zero()
+
 
         # ap.reset_arm()
 if __name__ == '__main__':
