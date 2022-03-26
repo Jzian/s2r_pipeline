@@ -68,8 +68,9 @@ private:
     int NUMS = 0,NUMS_last = 0;
     geometry_msgs::Twist MoveTwist;
     geometry_msgs::Pose2D Target;
+    geometry_msgs::Pose2D Target3point;
     bool TargetGetFlag{false},newGoal{true},DetectFlag{false},done{false},PutFlag{false},arrival{false};
-    bool GraspFlag{false},ToPut{false},PutOnce{true};
+    bool GraspFlag{false},ToPut{false},PutOnce{true},threeTransFlag{true},threePutFlag{true},GoOnce{true};
     ros::Publisher log_pub;
     ServiceCaller* serviceCaller;
     ros::Subscriber subTarget;
@@ -82,7 +83,7 @@ private:
     void Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTarget);
     void Move_cmd_Stop();
     bool ArrivalGoal(geometry_msgs::Pose2D PosrIn);
-    
+    bool Arrivalxy(geometry_msgs::Pose2D poseIn);
 public:
     // EP_Nav(const std::string& base_foot_print,std::string odom_frame,std::string map_frame,std::string serial_addr,bool publish_tf);
     // ~EP_Nav();
@@ -94,7 +95,7 @@ public:
     };
     
     struct Posearray{
-        double x[7] , y[7] , th[7] ;
+        double x[8] , y[8] , th[8] ;
     }posearray{};
     std::string MAP_FRAME , BASE_FOOT_PRINT;
     Posearray pose_targets{};
@@ -219,6 +220,8 @@ bool EP_Nav::ArrivalGoal(geometry_msgs::Pose2D PoseTarget)
     {
         arrival = true;
     }
+    else
+        arrival = false;
     if(arrival)
     {
         std::cout << "arrive xy" << std::endl;
@@ -229,7 +232,7 @@ bool EP_Nav::ArrivalGoal(geometry_msgs::Pose2D PoseTarget)
             // dth = currentpose.theta - PoseTarget.theta;
             // MoveTwist.angular.z = -dth;
             Move_cmd(MoveTwist,PoseTarget);
-            std::cout << "move th" << std::endl;
+            std::cout << "move th xy done!" << std::endl;
             done = true;
             arrival =false;
             done = false;
@@ -261,7 +264,9 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
 {
     geometry_msgs::Twist pose;     
     geometry_msgs::Pose2D currentpose;
-    double dx,dy,dth,Cth,Tth ,turn;       
+    double dx,dy,dth,Cth,Tth ,turn,midx,midy;
+    midx = 0.336;
+    midy = 1.2;       
     currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);                
     dth = currentpose.theta - PoseTarget.theta;
     Cth = currentpose.theta;
@@ -301,16 +306,26 @@ void EP_Nav::Move_cmd(geometry_msgs::Twist poseIn ,geometry_msgs::Pose2D PoseTar
     }
     Move_cmd_Stop();
     currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);  
-    dx = PoseTarget.x - currentpose.x;
-    dy = PoseTarget.y - currentpose.y; // dy>0 left
-    pose.linear.x = dx/2;
-    pose.linear.y = dy/2;
+    dx = PoseTarget.x - currentpose.x  ;
+    dy = PoseTarget.y - currentpose.y  ; // dy>0 left
+    if(PoseTarget.theta < -3)
+    {
+        dx = -dx;
+        dy = dy;
+    }
+    else if(PoseTarget.theta < 0)
+    {
+        dx = -dy;
+        dy = dx;
+    }
+    pose.linear.x = dx;
+    pose.linear.y = dy;
     pose.linear.z = 0;
     pose.angular.x = 0;
     pose.angular.y = 0;
     pose.angular.z = 0;
     pub_move_cmd.publish(pose);
-
+    sleep(0.5);
     // pose.linear.x = poseIn.linear.x;
     // pose.linear.y = poseIn.linear.y;
     // pose.linear.z = poseIn.linear.z;
@@ -335,7 +350,7 @@ void EP_Nav::Move_cmd_Stop()
 EP_Nav::Posearray EP_Nav::PoseSet()
 {
     EP_Nav::Posearray posearray{};
-    posearray.x[0] = 0.871 ,posearray.y[0] = 1.55, posearray.th[0] = 0.00;    //Box
+    posearray.x[0] = 1.01 ,posearray.y[0] = 1.73, posearray.th[0] = 0.00;    //Box
     posearray.x[1] = 0.633 ,posearray.y[1] = 3.18, posearray.th[1] = -3.13;    //num1
     posearray.x[2] = 0.384 ,posearray.y[2] = 2.9, posearray.th[2] = -1.57;    //num2
     // posearray.x[3] = 2.504 ,posearray.y[3] = 2.441, posearray.th[3] = 1.599;    //num3
@@ -343,6 +358,7 @@ EP_Nav::Posearray EP_Nav::PoseSet()
     posearray.x[4] = 2.22 ,posearray.y[4] = 0.014, posearray.th[4] = -3.13;    //num4
     posearray.x[5] = 2.69 ,posearray.y[5] = -0.859, posearray.th[5] = 0.00;   //num5
     posearray.x[6] = 0.167 ,posearray.y[6] = 1.512, posearray.th[6] = 0.00;  //detect GoalNums
+    posearray.x[7] = 1.35 ,posearray.y[7] = 2.67, posearray.th[7] = 0;
     return posearray;
 }
 
@@ -387,6 +403,23 @@ geometry_msgs::Pose2D EP_Nav::ToPose(Posearray poseIn,int num)
     return p;
 }
 
+bool EP_Nav::Arrivalxy(geometry_msgs::Pose2D poseIn)
+{
+    geometry_msgs::Pose2D currentpose;
+    double dx,dy,dth;
+    currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);
+    dx = abs(currentpose.x - Target3point.x);
+    dy = abs(currentpose.y - Target3point.y);  
+    if(dx < 0.15 && dy < 0.15)
+    {   
+        return true;
+    }
+    else
+        return false;
+}
+
+
+
 void EP_Nav::run()
 {
     //if(!TagetNumArray.empty() && TargetGetFlag)
@@ -427,10 +460,28 @@ void EP_Nav::run()
     {
         if(newGoal)
         {
-            GotoTarget(pose_targets, TagetNumArray[NUMS]);
-            newGoal = false;
-            std::cout << "nums: " << NUMS << "; targetnum: "<< TagetNumArray[NUMS] << std::endl;
-            GraspFlag = true;
+            if(TagetNumArray[NUMS] == 3 && GoOnce)
+            {
+                GoOnce = false;
+                threeTransFlag = false;
+                GotoTarget(pose_targets, 7);
+                Target3point = ToPose(pose_targets, 7); 
+            }
+            if (!GoOnce)
+            {
+                if(Arrivalxy(Target3point))
+                {
+                    GoOnce = true;
+                    threeTransFlag = true;                    
+                }
+            }            
+            if(threeTransFlag)
+            {
+                GotoTarget(pose_targets, TagetNumArray[NUMS]);
+                newGoal = false;
+                std::cout << "nums: " << NUMS << "; targetnum: "<< TagetNumArray[NUMS] << std::endl;
+                GraspFlag = true;
+            }
         }
         if(GraspFlag)
         {
@@ -440,8 +491,7 @@ void EP_Nav::run()
             {
                 serviceCaller->Grasp_worker(Grasp , TagetNumArray[NUMS]); 
                 GraspFlag = false;
-            }
-                                    
+            }                                    
         }
         if(serviceCaller->GraspDone && !PutFlag)
         {
@@ -452,8 +502,23 @@ void EP_Nav::run()
         }          
         if(PutFlag)
         {
+            if(TagetNumArray[NUMS] == 3 && GoOnce)
+            {
+                GoOnce = false;
+                threePutFlag = false;
+                GotoTarget(pose_targets,7);
+                Target3point = ToPose(pose_targets,7); 
+            }
+            if (!GoOnce)
+            {
+                if(Arrivalxy(Target3point))
+                {
+                    GoOnce = true;
+                    threePutFlag = true;                    
+                }
+            }   
             //navCore->cancelAllGoals();
-            if (ToPut)
+            if (ToPut && threePutFlag)
             {
                 GotoTarget(pose_targets,0);
                 ToPut = false;
@@ -487,18 +552,13 @@ void EP_Nav::run()
                 newGoal = false;
         }
     }
-    // result = navCore->getMoveBaseActionResult();
-    // std::cout << "goal" << result << std::endl;
-    // } 
-    // for (; ite != TagetNumArray.end(); ite++){
-    //     std::cout << "array:" << *ite << std::endl;
-    // }
+
 }
 
 
 int main(int argc, char** argv)
 {
-    sleep(6);
+    sleep(3);
     ros::init(argc , argv, "sim2real_client");
     ros::NodeHandle nh_;
     ros::Rate loop_rate(10);
