@@ -380,13 +380,13 @@ class placeAruco:
 
         _, rotate_goal, _ = self.q2e(rvec)
 
-        goal = [0.0305, 0.0, 0.2]
+        goal = [0.0304, 0.0, 0.2]
         distance_in_x = tvec[2] - goal[2]
         distance_in_y = tvec[0] - goal[0]
         # print("distance in x", distance_in_x)
         # print("distance in y", distance_in_y)
 
-        if (distance_in_x <= gama_x) and (abs(distance_in_y) <= gama_y) and (abs(rotate_goal) < 1.3):
+        if (distance_in_x <= gama_x) and (abs(distance_in_y) <= gama_y) and (abs(rotate_goal) < 5):
             # step forward
             self.move_base_velocity_x(b_vector=0.20, duration=14)
             # print(distance_in_x)
@@ -436,10 +436,10 @@ class placeAruco:
                 # elif abs(distance_in_y) <= gama_y and distance_in_y > 0:
                 #     self.move_function_xy(0, -1)
                 # print("rotate_goal", rotate_goal)
-                if rotate_goal > 1.3:
+                if rotate_goal > 5:
                     self.move_function_z(-0.45)
                     pass
-                elif rotate_goal < -1.3:
+                elif rotate_goal < -5:
                     self.move_function_z(0.45)
 
 

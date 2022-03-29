@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # kevin_node
+import re
 from s2r_pipeline.srv import TargetNumber, TargetNumberResponse
 import rospy
 import threading
@@ -44,8 +45,7 @@ class detect_grasp_place_server():
                 return TargetNumberResponse(False, self.target_numbers[0], self.target_numbers[1], self.target_numbers[2])
             else:
                 print(self.target_numbers)
-                self.toServer.grasp_place.move_right_by_distance(0.2)
-                # return TargetNumberResponse(True, 2, 1, 4)
+                # return TargetNumberResponse(True, 5, 4, 3)
                 return TargetNumberResponse(True, self.target_numbers[0], self.target_numbers[1], self.target_numbers[2])
         elif req.work_case == 7 and req.number == self.toServer.case2_number_class():
             # elif req.work_case == 2:
@@ -83,6 +83,13 @@ class detect_grasp_place_server():
             #         local_flag = False
             #     except Exception:
             #         self.toServer.grasp_place.move_forward_by_distance(-0.2)
+            # if self.target_numbers[0] == 5:
+            #     if req.number == 5:
+            #         print('number is 5')
+            #         self.toServer.grasp_place.move_forward_by_distance(5)
+            #         rospy.sleep(3)
+            #         self.toServer.grasp_place.move_right_by_distance(0.5)
+            #         rospy.sleep(1)
             self.grasp_kevin(req.number)
             self.judge_state_distance = 0
             self.judge_state_center = 0
@@ -222,6 +229,11 @@ class detect_grasp_place_server():
                     self.target_number_pose = self.point_list_max_top(
                         point_list)
                     pose = self.target_number_pose
+                # elif number == 5 and self.target_number[0] == 5:
+                #     point_list = get_number_pose_ddd()
+                #     self.target_number_pose = self.point_list_max_top(
+                #         point_list)
+                #     pose = self.target_number_pose
                 else:
                     self.target_number_pose = self.toServer.case2_number_pose()
                     pose = self.target_number_pose
