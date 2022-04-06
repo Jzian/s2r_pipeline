@@ -39,8 +39,8 @@ class detect_grasp_place_server():
     def targetCallback(self, req):
         print(req.work_case)
         if req.work_case == 1:
-            self.target_numbers = self.toServer.case1_target_numbers('target_number')[
-                0]
+            self.target_numbers = self.toServer.case1_target_numbers(
+                'target_number')
             if self.target_numbers == [9, 9, 9]:
                 return TargetNumberResponse(False, self.target_numbers[0], self.target_numbers[1], self.target_numbers[2])
             else:

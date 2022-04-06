@@ -4,6 +4,7 @@ from get_number_pose_1 import get_number_pose_1
 from get_number_pose_1 import get_box_pose_ddd
 from get_number_class_1 import get_number_class_1
 from get_number_class_pose_3 import get_number_class_pose_3
+from get_target_number import get_target_number
 
 import numpy as np
 import cv2
@@ -15,7 +16,7 @@ from grasp_cube_kevin import grasp_cube_kevin
 
 class toServer():
     def __init__(self):
-        self.case1_target_numbers = get_number_class_pose_3
+        self.case1_target_numbers = get_target_number
         self.case2_number_class = get_number_class_1
         # self.case2_number_pose = get_number_pose_ddd
         self.case2_number_pose = get_number_pose_1
