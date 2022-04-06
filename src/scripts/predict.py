@@ -69,7 +69,7 @@ def predict(img):
     # img = img.to('cuda:0')
     cnn = CNN()
     # cnn = cnn.to('cuda:0')
-    pth_path = '/home/sim2real/ep_ws/src/s2r_pipeline/src/scripts/cnn.pth'
+    pth_path = '/home/sim2real/ep_ws/src/s2r_pipeline/src/scripts/cnn_real_best.pth'
     cnn.load_state_dict(torch.load(pth_path))
     cnn.eval()
     with torch.no_grad():
