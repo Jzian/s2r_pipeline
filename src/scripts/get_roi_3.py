@@ -121,15 +121,12 @@ def get_roi_3(img, method_flag='target_number'):
     roi_box = []
 
     for i, num in enumerate(top_index):
-        if area_size_list[num] > 200:
-            roi_temp = extract_roi(img.copy(), contours[num].squeeze())
-            # cv2.imwrite('./output/07 抠图.png', roi_temp)
-            roi.append(roi_temp)
+        if area_size_list[num] > 2000:
             roi_box_temp = cv2.approxPolyDP(
                 contours[num], 3, True)
-            roi_box.append(roi_box_temp)  # 多边形拟合
-            roi_box1 = cv2.polylines(
-                img.copy(), [roi_box_temp], True, (255, 255, 0), 1)
-            # cv2.imwrite('./output/08 抠图方' + str(i) + '.png', roi_box1)
+            if len(roi_box_temp) == 4:
+                roi_box.append(roi_box_temp)  # 多边形拟合
+                roi_temp = extract_roi(img.copy(), contours[num].squeeze())
+                roi.append(roi_temp)
 
     return roi, roi_box

@@ -115,13 +115,12 @@ def get_roi_3(img, method_flag='target_number'):
     roi = []
     roi_box = []
     for i, num in enumerate(top_index):
-        if area_size_list[num] > 200:
-            roi_temp = extract_roi(img.copy(), contours[num].squeeze())
-            roi_temp_gray = cv2.cvtColor(roi_temp, cv2.COLOR_BGR2GRAY)
-            roi.append(roi_temp_gray)
-            # roi.append(roi_temp)
+        if area_size_list[num] > 2000:
             roi_box_temp = cv2.approxPolyDP(
                 contours[num], 3, True)
-            roi_box.append(roi_box_temp)
+            if len(roi_box_temp) == 4:
+                roi_box.append(roi_box_temp)  # 多边形拟合
+                roi_temp = extract_roi(img.copy(), contours[num].squeeze())
+                roi.append(roi_temp)
 
     return roi, roi_box

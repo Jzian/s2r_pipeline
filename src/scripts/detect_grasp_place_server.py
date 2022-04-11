@@ -224,11 +224,13 @@ class detect_grasp_place_server():
                 # pose = self.target_number_pose
                 # self.toServer.grasp_place.pose_msg = self.toServer.grasp_place.point2msg(
                 #     pose)
+
                 if number == 2:
                     point_list = get_number_pose_ddd()
                     self.target_number_pose = self.point_list_max_top(
                         point_list)
                     pose = self.target_number_pose
+
                 # elif number == 5 and self.target_number[0] == 5:
                 #     point_list = get_number_pose_ddd()
                 #     self.target_number_pose = self.point_list_max_top(

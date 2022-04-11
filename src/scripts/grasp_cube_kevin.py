@@ -199,6 +199,7 @@ class grasp_cube_kevin():
 
     def distance_funtion(self, distance):
         d = distance*1
+
         if (d > 0) and (d < 1):
             d = 1
         if (d < 0) and (d > -1):
@@ -214,7 +215,8 @@ class grasp_cube_kevin():
         vel_cmd.angular.y = 0.0
         vel_cmd.angular.z = 0.0
         self.base_move_vel_pub.publish(vel_cmd)
-        rospy.sleep(0.01)
+        print('into move', dx, dy)
+        rospy.sleep(0.05)
         vel_cmd.linear.x = 0.0
         vel_cmd.linear.y = 0.0
         vel_cmd.linear.z = 0.0
@@ -344,7 +346,7 @@ class grasp_cube_kevin():
         vel_cmd.angular.y = 0.0
         vel_cmd.angular.z = z
         self.base_move_vel_pub.publish(vel_cmd)
-        print('move z')
+        # print('move z')
         rospy.sleep(0.01)
         # motor STOP
         vel_cmd.linear.x = 0.0
@@ -426,10 +428,10 @@ class grasp_cube_kevin():
         rotate_goal = r
         distance_in_y = center-mid
         distance_in_x = distance
-        # print('distance_in_x', distance_in_x)
-        # print('distance_in_y', distance_in_y)
-        # print('rotate_goal', rotate_goal)
-        if (distance_in_x <= gama_x) and (abs(distance_in_y) <= gama_y and abs(rotate_goal) < 5.5):
+        print('distance_in_x', distance_in_x)
+        print('distance_in_y', distance_in_y)
+        print('rotate_goal', rotate_goal)
+        if (distance_in_x <= gama_x) and (abs(distance_in_y) <= gama_y) and (abs(rotate_goal) < 5.5):
             self.move_function_xy(1, 0, 0.13)
             self.grasp_cube()
             self.place_success = True
@@ -447,17 +449,15 @@ class grasp_cube_kevin():
                 epoches = 1
             for i in range(epoches):
                 if distance_in_x <= gama_x:
-                    dx = 0
+                    dx = 0.01
                 else:
-
                     dx = self.distance_funtion(distance_in_x*0.3)
+
                 if abs(distance_in_y) <= gama_y:
-                    dy = 0
+                    dy = 0.01
                 else:
                     dy = self.distance_funtion(distance_in_y*4)
 
-                # print("fffffffffffffffffffffff")
-                # print(dx, dy)
                 self.my_move_function(dx=dx, dy=dy)
                 if rotate_goal > 5.5:
                     self.move_function_z(-0.5)
