@@ -66,11 +66,11 @@ def predict(img):
     img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
     img = data_transform(img)
     img = torch.unsqueeze(img, dim=0)
-    # img = img.to('cuda:0')
+    img = img.to('cpu')
     cnn = CNN()
-    # cnn = cnn.to('cuda:0')
-    pth_path = '/home/sim2real/ep_ws/src/s2r_pipeline/src/scripts/cnn_real_best.pth'
-    cnn.load_state_dict(torch.load(pth_path))
+    cnn = cnn.to('cpu')
+    pth_path = '/home/sim2real/ep_ws/src/s2r_pipeline/src/scripts/cnn_real_1.27401.pth'
+    cnn.load_state_dict(torch.load(pth_path, map_location='cpu'))
     cnn.eval()
     with torch.no_grad():
         output = torch.squeeze(cnn(img))
