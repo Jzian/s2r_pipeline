@@ -225,20 +225,23 @@ class detect_grasp_place_server():
                 # self.toServer.grasp_place.pose_msg = self.toServer.grasp_place.point2msg(
                 #     pose)
 
-                if number == 2:
-                    point_list = get_number_pose_ddd()
-                    self.target_number_pose = self.point_list_max_top(
-                        point_list)
-                    pose = self.target_number_pose
+                # if number == 2:
+                # point_list = get_number_pose_ddd()
+                # self.target_number_pose = self.point_list_max_top(
+                #     point_list)
+                # pose = self.target_number_pose
 
                 # elif number == 5 and self.target_number[0] == 5:
                 #     point_list = get_number_pose_ddd()
                 #     self.target_number_pose = self.point_list_max_top(
                 #         point_list)
                 #     pose = self.target_number_pose
-                else:
-                    self.target_number_pose = self.toServer.case2_number_pose()
-                    pose = self.target_number_pose
+                # else:
+                if number == 2:
+                    # self.toServer.grasp_place.move_function_z(0.1)
+                    print('correct 2')
+                self.target_number_pose = self.toServer.case2_number_pose()
+                pose = self.target_number_pose
                 self.toServer.grasp_place.pose_msg = self.toServer.grasp_place.point2msg(
                     pose)
                 center = self.toServer.grasp_place.pose_msg.position.x

@@ -143,6 +143,17 @@ class grasp_cube_kevin():
         print("move the base in right")
         self.base_move_position_pub.publish(move_base_msg_y)
 
+    def move_z_by_distance(self, distance):
+        move_base_msg_y = Twist()
+        move_base_msg_y.linear.x = 0.0
+        move_base_msg_y.linear.y = 0.0
+        move_base_msg_y.linear.z = 0.0
+        move_base_msg_y.angular.x = 0.0
+        move_base_msg_y.angular.y = 0.0
+        move_base_msg_y.angular.z = distance
+        print("move the base in right")
+        self.base_move_position_pub.publish(move_base_msg_y)
+
     def set_vel2zero(self):
         vel_cmd = Twist()
         vel_cmd.linear.x = 0.0

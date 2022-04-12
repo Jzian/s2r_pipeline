@@ -14,8 +14,8 @@ def detect_grasp_place_client():
         detect_grasp_place_request = rospy.ServiceProxy(
             '/detect_grasp_place_service', TargetNumber)
         req = TargetNumberRequest()
-        req.work_case = 1
-        req.number = 0
+        req.work_case = 2
+        req.number = 2
         response = detect_grasp_place_request(req)
         return response
     except(rospy.ServiceException):
