@@ -17,6 +17,7 @@ cdef unsigned char absSub(unsigned char v1, unsigned char v2):
 # python3 setup.py build_ext --inplace
 # python3 detector_python.py
 
+# segment the red part of the whole picture
 def red_segmentation(np.ndarray[DTYPE_t, ndim=2] image,np.ndarray[DTYPE_t, ndim=3] hsv_image,np.ndarray[DTYPE_t, ndim=1] seg_papram):
 
     cdef int height, width, i, j
@@ -39,7 +40,8 @@ def red_segmentation(np.ndarray[DTYPE_t, ndim=2] image,np.ndarray[DTYPE_t, ndim=
                 image[i,j] = 0
             else:
                 image[i,j] = 255
-                
+
+# sum up differences of two pictuires , get the evaluation index of the degree of difference
 def img_sum(np.ndarray[DTYPE_t, ndim=2] image):
     cdef int height, width, i, j
     height = image.shape[0]
@@ -55,6 +57,8 @@ class point:
         self.x = x
         self.y = y
 
+# these four function is used to sort the point 
+# adjust the posion of the four vertices
 def cross(x1,y1,x2,y2):
     return x1*y2-x2*y1
 
@@ -103,6 +107,7 @@ def load_template():
         tpl = cv2.imread(tpl_path + str(i) + ".png", 0)
         templates.append(tpl)
 
+# the main function returns the potion and ID of the box 
 def pose_detection(np.ndarray[DTYPE_t, ndim=3] frame,np.ndarray[DTYPE_t, ndim=1] seg_papram):
 
     r = 0.045
@@ -124,10 +129,12 @@ def pose_detection(np.ndarray[DTYPE_t, ndim=3] frame,np.ndarray[DTYPE_t, ndim=1]
 
     red_segmentation(grayImg,hsvImg,seg_papram)
 
-    contours, hierarchy = cv2.findContours(grayImg,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)  
+    contours, hierarchy = cv2.findContours(grayImg,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)  
+    # cv2.drawContours(frame,contours,-1,(0,0,255),2)
+    hierarchy=hierarchy.squeeze()
 
-    quads = []
-    quads_f = []
+    quads = [] # a list, four vertices after sorted
+    quads_f = [] 
     quads_prj = []
 
     for i in range(len(contours)):
@@ -135,14 +142,15 @@ def pose_detection(np.ndarray[DTYPE_t, ndim=3] frame,np.ndarray[DTYPE_t, ndim=1]
         area = cv2.contourArea(cnt)
         bbox = cv2.boundingRect(cnt)
         if area >=30 :
-            approx = cv2.approxPolyDP(cnt,15,True)
-            if len(approx) == 4:
+            approx = cv2.approxPolyDP(cnt,5,True)
+            if len(approx) == 4 and hierarchy[i][3]==-1:
                 approx_sort = sort_contour(approx)
                 quads.append(approx_sort)
                 quads_f.append(approx_sort.astype(float))
     rvec_list = []
     tvec_list = []
     area_list = []
+
     for i in range(len(quads_f)):
         model_image = np.array([(quads_f[i][0,0,0],quads_f[i][0,0,1]),
                                 (quads_f[i][1,0,0],quads_f[i][1,0,1]),
@@ -219,6 +227,8 @@ def pose_detection(np.ndarray[DTYPE_t, ndim=3] frame,np.ndarray[DTYPE_t, ndim=1]
         elif quads_ID[i] == 5:
             cv2.putText(frame, 'X', (bbox[0], bbox[1]), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 2)
 
-    cv2.drawContours(frame,quads_prj_draw,-1,(0,255,0),3)
+    cv2.drawContours(frame,quads_prj,-1,(0,255,0),3)
+    # cv2.imshow("result",frame)
+    # cv2.waitKey(1)
 
     return quads_ID,tvec_list,rvec_list,quads
