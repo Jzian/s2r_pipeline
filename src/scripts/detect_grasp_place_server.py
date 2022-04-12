@@ -208,7 +208,8 @@ class detect_grasp_place_server():
                 if sub_numbers_sort_index == sub_roi_size_index:
                     return roi_box[roi_size_index[i]]
 
-    def grasp_kevin(self, number):
+    def grasp_kevin(self, target_number=0):
+        number = target_number
         self.grasp_flag = False
         rate = rospy.Rate(100)
         self.toServer.grasp_place.set_arm()
@@ -237,9 +238,6 @@ class detect_grasp_place_server():
                 #         point_list)
                 #     pose = self.target_number_pose
                 # else:
-                if number == 2:
-                    # self.toServer.grasp_place.move_function_z(0.1)
-                    print('correct 2')
                 self.target_number_pose = self.toServer.case2_number_pose()
                 pose = self.target_number_pose
                 self.toServer.grasp_place.pose_msg = self.toServer.grasp_place.point2msg(
@@ -249,9 +247,14 @@ class detect_grasp_place_server():
                 self.judge_state_distance = distance
                 self.judge_state_center = center
                 # print(center, distance)
-                self.toServer.grasp_place.forward_to_cube(
-                    center, distance, self.toServer.grasp_place.pose_msg.orientation)
-            except Exception as e:
+                if self.toServer.grasp_place.forward_to_cube(
+                        center, distance, self.toServer.grasp_place.pose_msg.orientation, target_number=number):
+                    # print(self.toServer.grasp_place.grasp_success)
+                    # if self.toServer.grasp_place.grasp_success:
+                    self.grasp_flag = True
+                    self.toServer.grasp_place.grasp_success = False
+                    return True
+            except Exception:
                 print('the img is wrong')
                 self.toServer.grasp_place.move_forward_by_distance(-0.2)
                 rospy.sleep(0.5)
@@ -277,6 +280,7 @@ class detect_grasp_place_server():
                 if self.toServer.grasp_place.grasp_success:
                     self.grasp_flag = True
                     self.toServer.grasp_place.grasp_success = False
+                    return True
             rate.sleep()
         if self.grasp_flag:
             self.grasp_flag = False

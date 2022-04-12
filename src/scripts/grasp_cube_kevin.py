@@ -1,5 +1,3 @@
-
-from dis import dis
 import math
 import rospy
 from geometry_msgs.msg import Twist, Point, Pose
@@ -226,7 +224,7 @@ class grasp_cube_kevin():
         vel_cmd.angular.y = 0.0
         vel_cmd.angular.z = 0.0
         self.base_move_vel_pub.publish(vel_cmd)
-        print('into move', dx, dy)
+        # print('into move', dx, dy)
         rospy.sleep(0.05)
         vel_cmd.linear.x = 0.0
         vel_cmd.linear.y = 0.0
@@ -316,8 +314,8 @@ class grasp_cube_kevin():
         vel_cmd.angular.y = 0.0
         vel_cmd.angular.z = 0.0
         self.base_move_vel_pub.publish(vel_cmd)
-        print('move_x', x)
-        print('move_y', y)
+        # print('move_x', x)
+        # print('move_y', y)
         rospy.sleep(time)
         # motor STOP
         vel_cmd.linear.x = 0.0
@@ -401,15 +399,16 @@ class grasp_cube_kevin():
         self.move_arm()
         rospy.sleep(1)
         self.close_gripper()
-        rospy.sleep(0.5)
+        rospy.sleep(1.5)
         self.reset_arm()
         # rospy.sleep(1)
         # self.forward_zero()
         # rospy.sleep(1)
         self.move_forward_by_distance(-0.3)
         self.grasp_success = True
+        rospy.sleep(1)
 
-    def forward_to_cube(self, center, distance, orientation):
+    def forward_to_cube(self, center, distance, orientation, target_number=0):
         _, r, _ = self.q2e(orientation)
         mid = 0.037
         # print(r)
@@ -439,25 +438,61 @@ class grasp_cube_kevin():
         rotate_goal = r
         distance_in_y = center-mid
         distance_in_x = distance
-        print('distance_in_x', distance_in_x)
-        print('distance_in_y', distance_in_y)
-        print('rotate_goal', rotate_goal)
-        if (distance_in_x <= gama_x) and (abs(distance_in_y) <= gama_y) and (abs(rotate_goal) < 5.5):
-            self.move_function_xy(1, 0, 0.13)
-            self.grasp_cube()
-            self.place_success = True
+        # print('distance_in_x', distance_in_x, 'distance_in_y',
+        #       distance_in_y, 'rotate_goal', rotate_goal)
+        if target_number != 2:
+            if (distance_in_x <= gama_x) and (abs(distance_in_y) <= gama_y) and (abs(rotate_goal) < 5.5):
+                self.move_function_xy(1, 0, 0.13)
+                self.grasp_cube()
+                self.grasp_success = True
 
-        else:
-            if 0.3 < distance_in_x:
-                epoches = 8
-            elif 0.2 < distance_in_x < 0.3:
-                epoches = 5
-            elif 0.15 < distance_in_x < 0.2:
-                epoches = 3
-            elif distance_in_x < 0.14:
-                epoches = 1
             else:
-                epoches = 1
+                if 0.3 < distance_in_x:
+                    epoches = 8
+                elif 0.2 < distance_in_x < 0.3:
+                    epoches = 5
+                elif 0.15 < distance_in_x < 0.2:
+                    epoches = 3
+                elif distance_in_x < 0.14:
+                    epoches = 1
+                else:
+                    epoches = 1
+                for i in range(epoches):
+                    if distance_in_x <= gama_x:
+                        dx = 0
+                    else:
+                        dx = self.distance_funtion(distance_in_x*0.3)
+
+                    if abs(distance_in_y) <= gama_y:
+                        dy = 0
+                    else:
+                        dy = self.distance_funtion(distance_in_y*4)
+
+                    self.my_move_function(dx=dx, dy=dy)
+
+                    if rotate_goal > 5.5:
+                        self.move_function_z(-0.5)
+                    elif rotate_goal < -5.5:
+                        self.move_function_z(0.5)
+        else:
+            print('im going to grasp 2')
+            gama_y = 0.014
+            if (distance_in_x <= gama_x) and (abs(distance_in_y) <= gama_y) and (abs(rotate_goal) < 12):
+                self.move_function_xy(1, 0, 0.13)
+                self.grasp_cube()
+                self.grasp_success = True
+                return True
+            else:
+                if 0.3 < distance_in_x:
+                    epoches = 8
+                elif 0.2 < distance_in_x < 0.3:
+                    epoches = 5
+                elif 0.15 < distance_in_x < 0.2:
+                    epoches = 3
+                elif distance_in_x < 0.14:
+                    epoches = 1
+                else:
+                    epoches = 1
             for i in range(epoches):
                 if distance_in_x <= gama_x:
                     dx = 0
@@ -470,39 +505,41 @@ class grasp_cube_kevin():
                     dy = self.distance_funtion(distance_in_y*4)
 
                 self.my_move_function(dx=dx, dy=dy)
-                if rotate_goal > 5.5:
-                    self.move_function_z(-0.5)
-                elif rotate_goal < -5.5:
-                    self.move_function_z(0.5)
+                if 0.07 < distance_in_x < 0.12:
+                    self.move_function_z(2)
+                    print('correct 2')
+                if rotate_goal > 5:
+                    self.move_function_z(-0.3)
+                elif rotate_goal < -5:
+                    self.move_function_z(0.3)
+    # def forward_to_box(self, center, distance):
+    #     if distance > 0.45:
+    #         self.move_function_xy(1, 0)
+    #     elif 0.35 < distance < 0.45:
+    #         if center > 0.12:
+    #             self.move_right_by_distance(0.1)
+    #         elif center < -0.12:
+    #             self.move_left_by_distance(0.1)
+    #         else:
+    #             self.move_forward_by_distance(0.1)
 
-    def forward_to_box(self, center, distance):
-        if distance > 0.45:
-            self.move_function_xy(1, 0)
-        elif 0.35 < distance < 0.45:
-            if center > 0.12:
-                self.move_right_by_distance(0.1)
-            elif center < -0.12:
-                self.move_left_by_distance(0.1)
-            else:
-                self.move_forward_by_distance(0.1)
+    #     elif distance < 0.15:
+    #         self.grasp_cube()
 
-        elif distance < 0.15:
-            self.grasp_cube()
-
-    def place_cube(self):
-        print("===== start placing ====")
-        self.reset_arm()
-        rospy.sleep(1)
-        self.move_arm0()
-        rospy.sleep(1)
-        self.move_arm()
-        rospy.sleep(1)
-        self.open_gripper()
-        rospy.sleep(1)
-        self.reset_arm()
-        rospy.sleep(1)
-        self.close_gripper()
-        self.forward_zero()
-        rospy.sleep(1)
-        self.place_success = True
-        print("===== finish ====")
+    # def place_cube(self):
+    #     print("===== start placing ====")
+    #     self.reset_arm()
+    #     rospy.sleep(1)
+    #     self.move_arm0()
+    #     rospy.sleep(1)
+    #     self.move_arm()
+    #     rospy.sleep(1)
+    #     self.open_gripper()
+    #     rospy.sleep(1)
+    #     self.reset_arm()
+    #     rospy.sleep(1)
+    #     self.close_gripper()
+    #     self.forward_zero()
+    #     rospy.sleep(1)
+    #     self.place_success = True
+    #     print("===== finish ====")
