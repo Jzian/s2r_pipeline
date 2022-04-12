@@ -449,12 +449,12 @@ class grasp_cube_kevin():
                 epoches = 1
             for i in range(epoches):
                 if distance_in_x <= gama_x:
-                    dx = 0.01
+                    dx = 0
                 else:
                     dx = self.distance_funtion(distance_in_x*0.3)
 
                 if abs(distance_in_y) <= gama_y:
-                    dy = 0.01
+                    dy = 0
                 else:
                     dy = self.distance_funtion(distance_in_y*4)
 

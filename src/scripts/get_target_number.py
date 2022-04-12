@@ -43,7 +43,6 @@ def get_target_number(method):
     for cls_n in cls_np:
         index.append(np.argmax(cls_n))
     index = [index[i]+1 for i in numbers_sort_index]
-    pos = [pos[i] for i in numbers_sort_index]
     # if max(cls_np) < 0.2:
     #     index = [9, 9, 9]
     #     pos = []
